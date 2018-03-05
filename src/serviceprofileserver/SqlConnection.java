@@ -95,8 +95,15 @@ public final class SqlConnection {
     }
     //update the item in the DB 
     //TODO: implement
+    public boolean updateToDB(ProfileInfo updateItem){
+	return true;
+    }
     //remove the item from the DB
     //TODO: implement
+    public boolean removeFromDB(String key){
+	return true;
+    }
+    
     public static SqlConnection getInstance(){
         return INSTANCE;
     }

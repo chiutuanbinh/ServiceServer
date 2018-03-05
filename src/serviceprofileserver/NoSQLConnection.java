@@ -35,15 +35,23 @@ public final class NoSQLConnection {
     //get from Db, turn the stream data back to obj
     public ProfileInfo getFromBD(String key){
         byte[] bItem = db.get(key.getBytes());
-        ProfileInfo item = (ProfileInfo)SerializationUtils.deserialize(bItem);
-        return item;
+	if (bItem == null){
+	    return null;
+	}
+	else{
+	    ProfileInfo item = (ProfileInfo)SerializationUtils.deserialize(bItem);
+	    return item;
+	}
     }
     //update the item in the DB to a new value
     //TODO: implement the updateMethod
     public boolean updateToDB(ProfileInfo updateItem){
-	db.set(updateItem.id.getBytes(), SerializationUtils.serialize(updateItem));
-	
-	return true;
+	if (db.set(updateItem.id.getBytes(), SerializationUtils.serialize(updateItem))){
+	    HashTable.getInstance().syncCache(updateItem.id, updateItem, 1);
+	    return true;
+	}
+	else
+	    return false;
     }
     //remove the item from the DB
     //TODO: implemet the removeMethod

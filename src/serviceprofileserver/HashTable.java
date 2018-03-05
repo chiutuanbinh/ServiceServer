@@ -22,7 +22,7 @@ public final class HashTable {
     private LinkedList<String> LRUQueue;
     private static final int MAX_CACHE_SIZE = 20;
     private int cacheSize = 0;
-    private String DBSetting = ServerSetting.getDBType();
+    private final String DBSetting = ServerSetting.getDBType();
     private HashTable(int i){
         infoTable = new HashMap<>(i);
 	LRUQueue = new LinkedList<>();
@@ -33,7 +33,7 @@ public final class HashTable {
     }
     
     public boolean setVal(String key, ProfileInfo element) throws Exception{
-	this.updateCache(key, element);
+	this.syncCache(key, element,2);
 	if (DBSetting.equals("NoSQL")){
 	    NoSQLConnection.getInstance().saveToDB(element);
 	}
@@ -68,7 +68,7 @@ public final class HashTable {
 		}
 	    }
 	    //Adjust the cache table
-	    this.updateCache(key, result);
+	    this.syncCache(key, result, 2);
 	}
 	return null;
     }
@@ -79,29 +79,53 @@ public final class HashTable {
 	return true;
     }
     
-    //Update the cache when a new value is add or get from the database throught cache
-    private boolean updateCache(String key, ProfileInfo element)throws Exception{
-	if (this.cacheSize == MAX_CACHE_SIZE){
-	    String removedKeyString = this.LRUQueue.removeLast();
-	    this.LRUQueue.addFirst(key);
-	    this.infoTable.remove(removedKeyString);
-	    this.infoTable.put(key, element);
-	}
-	else if (cacheSize > MAX_CACHE_SIZE){
-	    throw new Exception("cache size exceed limit");
-	}
-	else {
-	    this.LRUQueue.addFirst(key);
-	    this.infoTable.put(key, element);
-	    this.cacheSize += 1;
-	}
-	return true;
-    }
     
     //Update the cache when a value is delete from the database or change 
     //TODO
-    //@opType is 0 for removeOp, is 1 for updateOp
+    //@opType is 0 for removeOp, is 1 for updateOp, other if save or get
     public boolean syncCache(String key, ProfileInfo item, int opType){
+	switch (opType){
+	    case 0:
+		if (this.infoTable.containsKey(key)){
+		    this.infoTable.remove(key);
+		    this.LRUQueue.remove(key);
+		    this.cacheSize -= 1;
+		}
+		break;
+	    case 1:
+		if (this.infoTable.containsKey(key)){
+		    this.infoTable.remove(key);
+		    this.infoTable.put(key, item);
+		    this.LRUQueue.remove(key);
+		    this.LRUQueue.addFirst(key);
+		}
+		else {
+		    if (this.cacheSize == MAX_CACHE_SIZE){
+			String removedKeyString = this.LRUQueue.removeLast();
+			this.LRUQueue.addFirst(key);
+			this.infoTable.remove(removedKeyString);
+			this.infoTable.put(key, item);
+		    }
+			else {
+			this.LRUQueue.addFirst(key);
+			this.infoTable.put(key, item);
+			this.cacheSize += 1;
+		    }
+		}
+		break;
+	    default:
+		if (this.cacheSize == MAX_CACHE_SIZE){
+		    String removedKeyString = this.LRUQueue.removeLast();
+		    this.LRUQueue.addFirst(key);
+		    this.infoTable.remove(removedKeyString);
+		    this.infoTable.put(key, item);
+		}
+		else {
+		    this.LRUQueue.addFirst(key);
+		    this.infoTable.put(key, item);
+		    this.cacheSize += 1;
+		}
+	}
 	return true;
     }
 }
