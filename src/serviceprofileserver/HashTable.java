@@ -6,8 +6,9 @@
 package serviceprofileserver;
 
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -17,14 +18,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class HashTable {
     private static final HashTable INSTANCE = new HashTable(20);
-    private Hashtable<String,profileInfo> infoTable ;
-    private Queue<String> LRUQueue;
+    private HashMap<String,profileInfo> infoTable ;
+    private LinkedList<String> LRUQueue;
+    private static final int MAX_CACHE_SIZE = 20;
+    private int cacheSize = 0;
     
     private HashTable(int i){
-        infoTable = new Hashtable<String, profileInfo>(i);
-        infoTable.put("1", new profileInfo("A", "A@abc", "922323", new day(12, 12, 1983), "1"));
-        infoTable.put("2", new profileInfo("B", "B@abc", "345678", new day(1, 1, 1888), "2"));
-	LRUQueue = new LinkedBlockingQueue<String>(30);
+        infoTable = new HashMap<>(i);
+	LRUQueue = new LinkedList<>();
     }
     
     public static HashTable getInstance(){
@@ -32,10 +33,49 @@ public final class HashTable {
     }
     //TODO: implement
     public boolean setVal(String key, profileInfo element){
+	
 	return true;
     }
     //TODO: implement
-    public profileInfo getVal(String key){
-	return this.infoTable.get(key);
+    public profileInfo getVal(String key) throws Exception{
+	profileInfo result = null;
+	//The cache have the data
+	if (this.infoTable.containsKey(key)){
+	    this.LRUQueue.remove(key);
+	    this.LRUQueue.add(key);
+	    return this.infoTable.get(key);
+	}
+	else {
+	    //Cannot find the data, read the properties file to know where to look for the data
+	    String DBSetting = ServerSetting.getDBType();
+	    if (DBSetting.equals("NoSQL")){
+		result = noSQLConnection.getInstance().getFromBD(key);
+		if (result == null){
+		    return result;
+		}
+		
+	    }
+	    else if (DBSetting.equals("MySQL")){
+		result = sqlConnection.getInstance().getFromDB(key);
+		if (result == null){
+		    return result;
+		}
+	    }
+	    //Adjust the cache table
+	    if (this.cacheSize > MAX_CACHE_SIZE){
+		throw new Exception("Error cache size, bigger than limit");
+	    }
+	    else if (this.cacheSize == MAX_CACHE_SIZE){
+		this.LRUQueue.removeLast();
+		this.LRUQueue.addFirst(key);
+		this.infoTable.put(key, result);
+	    }
+	    else { 
+		this.LRUQueue.addFirst(key);
+		this.infoTable.put(key, result);
+		this.cacheSize += 1;
+	    }
+	}
+	return null;
     }
 }

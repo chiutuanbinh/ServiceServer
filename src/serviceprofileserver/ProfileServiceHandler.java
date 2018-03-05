@@ -46,20 +46,13 @@ public class ProfileServiceHandler implements ProfileService.Iface{
     
     @Override
     public profileInfo getProfile(String id) throws TException{
-        //if (HashTable.getInstance().infoTable.containsKey(id))
-	if (false)
-            return HashTable.getInstance().getVal(id);
-        else{
-	    profileInfo result = sqlConnection.getInstance().getFromDB(id);
-	    
-	    //profileInfo result = noSQLConnection.getInstance().getFromBD(id);
-	    
-            //System.out.println(result.toString());
-            if (result == null)
-                return new profileInfo("null", "null", "null", new day(0, 0, 0), "null");
-            else
-                return result; 
-            
-        }
+        profileInfo result = new profileInfo("null", "null", "null", new day(), "null");
+	try{
+	    result = HashTable.getInstance().getVal(id);    
+	}
+	catch(Exception e){
+	    e.printStackTrace();
+	}
+	return result;
     }
 }

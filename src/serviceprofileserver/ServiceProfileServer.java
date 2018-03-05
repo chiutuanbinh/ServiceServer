@@ -5,10 +5,11 @@
  */
 package serviceprofileserver;
 
-import java.util.Hashtable;
 import org.apache.thrift.TException;
+import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TSimpleServer;
+import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 
@@ -38,9 +39,6 @@ public class ServiceProfileServer {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        //init some example elements
-        infoHashtable.put("1", new profileInfo("A", "A@abc", "922323", new day(12, 12, 1983), "1"));
-        infoHashtable.put("2", new profileInfo("B", "B@abc", "345678", new day(1, 1, 1888), "2"));
         StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
     }
     
