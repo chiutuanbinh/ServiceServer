@@ -17,8 +17,6 @@ import org.apache.thrift.transport.TServerTransport;
  * @author root
  */
 public class ServiceProfileServer {
-    //The hashtable used to store temporary info
-    public static Hashtable<String,profileInfo> infoHashtable = new Hashtable<>(20);
 
     public static void StartSimpleServer(ProfileService.Processor<ProfileServiceHandler> processor){
         
@@ -28,6 +26,7 @@ public class ServiceProfileServer {
                     new TServer.Args(serverTransport).processor(processor));
             System.out.println("Starting the server - ready to serve");
             server.serve();
+	    
         }
         catch (TException e){
             e.printStackTrace();

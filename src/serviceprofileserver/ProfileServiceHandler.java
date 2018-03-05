@@ -26,7 +26,7 @@ public class ProfileServiceHandler implements ProfileService.Iface{
         int savingOption = 1;
         switch (savingOption){
             case 0: //using hash table
-                HashTable.getInstance().infoTable.put(profile.id, profile);
+                HashTable.getInstance().setVal(profile.id, profile);
                 success = true;
                 break;
             case 1: //using mysql
@@ -48,7 +48,7 @@ public class ProfileServiceHandler implements ProfileService.Iface{
     public profileInfo getProfile(String id) throws TException{
         //if (HashTable.getInstance().infoTable.containsKey(id))
 	if (false)
-            return HashTable.getInstance().infoTable.get(id);
+            return HashTable.getInstance().getVal(id);
         else{
 	    profileInfo result = sqlConnection.getInstance().getFromDB(id);
 	    
