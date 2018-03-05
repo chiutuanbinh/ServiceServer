@@ -18,11 +18,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class HashTable {
     private static final HashTable INSTANCE = new HashTable(20);
-    private HashMap<String,profileInfo> infoTable ;
+    private HashMap<String,ProfileInfo> infoTable ;
     private LinkedList<String> LRUQueue;
     private static final int MAX_CACHE_SIZE = 20;
     private int cacheSize = 0;
-    
+    private String DBSetting = ServerSetting.getDBType();
     private HashTable(int i){
         infoTable = new HashMap<>(i);
 	LRUQueue = new LinkedList<>();
@@ -31,51 +31,77 @@ public final class HashTable {
     public static HashTable getInstance(){
         return INSTANCE;
     }
-    //TODO: implement
-    public boolean setVal(String key, profileInfo element){
-	
+    
+    public boolean setVal(String key, ProfileInfo element) throws Exception{
+	this.updateCache(key, element);
+	if (DBSetting.equals("NoSQL")){
+	    NoSQLConnection.getInstance().saveToDB(element);
+	}
+	else if (DBSetting.equals("MySQL")){
+	    SqlConnection.getInstance().saveToDB(element);
+	}
 	return true;
     }
-    //TODO: implement
-    public profileInfo getVal(String key) throws Exception{
-	profileInfo result = null;
+    
+    
+    public ProfileInfo getVal(String key) throws Exception{
+	ProfileInfo result = null;
 	//The cache have the data
 	if (this.infoTable.containsKey(key)){
 	    this.LRUQueue.remove(key);
-	    this.LRUQueue.add(key);
+	    this.LRUQueue.addFirst(key);
 	    return this.infoTable.get(key);
 	}
 	else {
 	    //Cannot find the data, read the properties file to know where to look for the data
-	    String DBSetting = ServerSetting.getDBType();
 	    if (DBSetting.equals("NoSQL")){
-		result = noSQLConnection.getInstance().getFromBD(key);
+		result = NoSQLConnection.getInstance().getFromBD(key);
 		if (result == null){
 		    return result;
 		}
 		
 	    }
 	    else if (DBSetting.equals("MySQL")){
-		result = sqlConnection.getInstance().getFromDB(key);
+		result = SqlConnection.getInstance().getFromDB(key);
 		if (result == null){
 		    return result;
 		}
 	    }
 	    //Adjust the cache table
-	    if (this.cacheSize > MAX_CACHE_SIZE){
-		throw new Exception("Error cache size, bigger than limit");
-	    }
-	    else if (this.cacheSize == MAX_CACHE_SIZE){
-		this.LRUQueue.removeLast();
-		this.LRUQueue.addFirst(key);
-		this.infoTable.put(key, result);
-	    }
-	    else { 
-		this.LRUQueue.addFirst(key);
-		this.infoTable.put(key, result);
-		this.cacheSize += 1;
-	    }
+	    this.updateCache(key, result);
 	}
 	return null;
+    }
+    
+    
+    public boolean removeVal(String key){
+	
+	return true;
+    }
+    
+    //Update the cache when a new value is add or get from the database throught cache
+    private boolean updateCache(String key, ProfileInfo element)throws Exception{
+	if (this.cacheSize == MAX_CACHE_SIZE){
+	    String removedKeyString = this.LRUQueue.removeLast();
+	    this.LRUQueue.addFirst(key);
+	    this.infoTable.remove(removedKeyString);
+	    this.infoTable.put(key, element);
+	}
+	else if (cacheSize > MAX_CACHE_SIZE){
+	    throw new Exception("cache size exceed limit");
+	}
+	else {
+	    this.LRUQueue.addFirst(key);
+	    this.infoTable.put(key, element);
+	    this.cacheSize += 1;
+	}
+	return true;
+    }
+    
+    //Update the cache when a value is delete from the database or change 
+    //TODO
+    //@opType is 0 for removeOp, is 1 for updateOp
+    public boolean syncCache(String key, ProfileInfo item, int opType){
+	return true;
     }
 }

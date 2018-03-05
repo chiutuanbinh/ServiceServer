@@ -39,15 +39,15 @@ public class ProfileService {
 
   public interface Iface {
 
-    public boolean setProfile(profileInfo profile) throws org.apache.thrift.TException;
+    public boolean setProfile(ProfileInfo profile) throws org.apache.thrift.TException;
 
-    public profileInfo getProfile(String id) throws org.apache.thrift.TException;
+    public ProfileInfo getProfile(String id) throws org.apache.thrift.TException;
 
   }
 
   public interface AsyncIface {
 
-    public void setProfile(profileInfo profile, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
+    public void setProfile(ProfileInfo profile, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
     public void getProfile(String id, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
@@ -73,13 +73,13 @@ public class ProfileService {
       super(iprot, oprot);
     }
 
-    public boolean setProfile(profileInfo profile) throws org.apache.thrift.TException
+    public boolean setProfile(ProfileInfo profile) throws org.apache.thrift.TException
     {
       send_setProfile(profile);
       return recv_setProfile();
     }
 
-    public void send_setProfile(profileInfo profile) throws org.apache.thrift.TException
+    public void send_setProfile(ProfileInfo profile) throws org.apache.thrift.TException
     {
       setProfile_args args = new setProfile_args();
       args.setProfile(profile);
@@ -96,7 +96,7 @@ public class ProfileService {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "setProfile failed: unknown result");
     }
 
-    public profileInfo getProfile(String id) throws org.apache.thrift.TException
+    public ProfileInfo getProfile(String id) throws org.apache.thrift.TException
     {
       send_getProfile(id);
       return recv_getProfile();
@@ -109,7 +109,7 @@ public class ProfileService {
       sendBase("getProfile", args);
     }
 
-    public profileInfo recv_getProfile() throws org.apache.thrift.TException
+    public ProfileInfo recv_getProfile() throws org.apache.thrift.TException
     {
       getProfile_result result = new getProfile_result();
       receiveBase(result, "getProfile");
@@ -137,7 +137,7 @@ public class ProfileService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void setProfile(profileInfo profile, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
+    public void setProfile(ProfileInfo profile, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       setProfile_call method_call = new setProfile_call(profile, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -145,8 +145,8 @@ public class ProfileService {
     }
 
     public static class setProfile_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private profileInfo profile;
-      public setProfile_call(profileInfo profile, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private ProfileInfo profile;
+      public setProfile_call(ProfileInfo profile, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.profile = profile;
       }
@@ -191,7 +191,7 @@ public class ProfileService {
         prot.writeMessageEnd();
       }
 
-      public profileInfo getResult() throws org.apache.thrift.TException {
+      public ProfileInfo getResult() throws org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -330,7 +330,7 @@ public class ProfileService {
       }
     }
 
-    public static class getProfile<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, getProfile_args, profileInfo> {
+    public static class getProfile<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, getProfile_args, ProfileInfo> {
       public getProfile() {
         super("getProfile");
       }
@@ -339,10 +339,10 @@ public class ProfileService {
         return new getProfile_args();
       }
 
-      public AsyncMethodCallback<profileInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+      public AsyncMethodCallback<ProfileInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new AsyncMethodCallback<profileInfo>() { 
-          public void onComplete(profileInfo o) {
+        return new AsyncMethodCallback<ProfileInfo>() { 
+          public void onComplete(ProfileInfo o) {
             getProfile_result result = new getProfile_result();
             result.success = o;
             try {
@@ -376,7 +376,7 @@ public class ProfileService {
         return false;
       }
 
-      public void start(I iface, getProfile_args args, org.apache.thrift.async.AsyncMethodCallback<profileInfo> resultHandler) throws TException {
+      public void start(I iface, getProfile_args args, org.apache.thrift.async.AsyncMethodCallback<ProfileInfo> resultHandler) throws TException {
         iface.getProfile(args.id,resultHandler);
       }
     }
@@ -394,7 +394,7 @@ public class ProfileService {
       schemes.put(TupleScheme.class, new setProfile_argsTupleSchemeFactory());
     }
 
-    public profileInfo profile; // required
+    public ProfileInfo profile; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -459,7 +459,7 @@ public class ProfileService {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.PROFILE, new org.apache.thrift.meta_data.FieldMetaData("profile", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, profileInfo.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ProfileInfo.class)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(setProfile_args.class, metaDataMap);
     }
@@ -468,7 +468,7 @@ public class ProfileService {
     }
 
     public setProfile_args(
-      profileInfo profile)
+      ProfileInfo profile)
     {
       this();
       this.profile = profile;
@@ -479,7 +479,7 @@ public class ProfileService {
      */
     public setProfile_args(setProfile_args other) {
       if (other.isSetProfile()) {
-        this.profile = new profileInfo(other.profile);
+        this.profile = new ProfileInfo(other.profile);
       }
     }
 
@@ -492,11 +492,11 @@ public class ProfileService {
       this.profile = null;
     }
 
-    public profileInfo getProfile() {
+    public ProfileInfo getProfile() {
       return this.profile;
     }
 
-    public setProfile_args setProfile(profileInfo profile) {
+    public setProfile_args setProfile(ProfileInfo profile) {
       this.profile = profile;
       return this;
     }
@@ -522,7 +522,7 @@ public class ProfileService {
         if (value == null) {
           unsetProfile();
         } else {
-          setProfile((profileInfo)value);
+          setProfile((ProfileInfo)value);
         }
         break;
 
@@ -681,7 +681,7 @@ public class ProfileService {
           switch (schemeField.id) {
             case 1: // PROFILE
               if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.profile = new profileInfo();
+                struct.profile = new ProfileInfo();
                 struct.profile.read(iprot);
                 struct.setProfileIsSet(true);
               } else { 
@@ -740,7 +740,7 @@ public class ProfileService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
-          struct.profile = new profileInfo();
+          struct.profile = new ProfileInfo();
           struct.profile.read(iprot);
           struct.setProfileIsSet(true);
         }
@@ -1482,7 +1482,7 @@ public class ProfileService {
       schemes.put(TupleScheme.class, new getProfile_resultTupleSchemeFactory());
     }
 
-    public profileInfo success; // required
+    public ProfileInfo success; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -1547,7 +1547,7 @@ public class ProfileService {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, profileInfo.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ProfileInfo.class)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getProfile_result.class, metaDataMap);
     }
@@ -1556,7 +1556,7 @@ public class ProfileService {
     }
 
     public getProfile_result(
-      profileInfo success)
+      ProfileInfo success)
     {
       this();
       this.success = success;
@@ -1567,7 +1567,7 @@ public class ProfileService {
      */
     public getProfile_result(getProfile_result other) {
       if (other.isSetSuccess()) {
-        this.success = new profileInfo(other.success);
+        this.success = new ProfileInfo(other.success);
       }
     }
 
@@ -1580,11 +1580,11 @@ public class ProfileService {
       this.success = null;
     }
 
-    public profileInfo getSuccess() {
+    public ProfileInfo getSuccess() {
       return this.success;
     }
 
-    public getProfile_result setSuccess(profileInfo success) {
+    public getProfile_result setSuccess(ProfileInfo success) {
       this.success = success;
       return this;
     }
@@ -1610,7 +1610,7 @@ public class ProfileService {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((profileInfo)value);
+          setSuccess((ProfileInfo)value);
         }
         break;
 
@@ -1769,7 +1769,7 @@ public class ProfileService {
           switch (schemeField.id) {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.success = new profileInfo();
+                struct.success = new ProfileInfo();
                 struct.success.read(iprot);
                 struct.setSuccessIsSet(true);
               } else { 
@@ -1828,7 +1828,7 @@ public class ProfileService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
-          struct.success = new profileInfo();
+          struct.success = new ProfileInfo();
           struct.success.read(iprot);
           struct.setSuccessIsSet(true);
         }

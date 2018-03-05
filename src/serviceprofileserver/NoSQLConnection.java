@@ -11,10 +11,10 @@ package serviceprofileserver;
  */
 import kyotocabinet.*;
 import org.apache.commons.lang.SerializationUtils;
-public final class noSQLConnection {
-    private static final noSQLConnection INSTANCE = new noSQLConnection();
-    public static DB db;
-    private noSQLConnection(){
+public final class NoSQLConnection {
+    private static final NoSQLConnection INSTANCE = new NoSQLConnection();
+    private static DB db;
+    private NoSQLConnection(){
         db = new DB();
         
         //open the database
@@ -25,20 +25,41 @@ public final class noSQLConnection {
 //        db.set("2".getBytes(), SerializationUtils.serialize(new profileInfo("B", "B@abc", "345678", new day(1, 1, 1888), "2")));
     }
     //save to Db, transform the profileInfo Obj into byte stream data
-    public boolean saveToDB(profileInfo saveItem){
+    public boolean saveToDB(ProfileInfo saveItem){
         byte[] bKey = saveItem.id.getBytes();
         byte[] bSaveItem = SerializationUtils.serialize(saveItem);
-        if (!db.set(bKey, bSaveItem))
+        if (!db.add(bKey, bSaveItem))
             return true;
         return false;
     }
     //get from Db, turn the stream data back to obj
-    public profileInfo getFromBD(String key){
+    public ProfileInfo getFromBD(String key){
         byte[] bItem = db.get(key.getBytes());
-        profileInfo item = (profileInfo)SerializationUtils.deserialize(bItem);
+        ProfileInfo item = (ProfileInfo)SerializationUtils.deserialize(bItem);
         return item;
     }
-    public static noSQLConnection getInstance(){
+    //update the item in the DB to a new value
+    //TODO: implement the updateMethod
+    public boolean updateToDB(ProfileInfo updateItem){
+	db.set(updateItem.id.getBytes(), SerializationUtils.serialize(updateItem));
+	
+	return true;
+    }
+    //remove the item from the DB
+    //TODO: implemet the removeMethod
+    public boolean removeFromDB(String key){
+	if (db.remove(key.getBytes())){
+	    ProfileInfo dummyItem = new ProfileInfo();
+	    HashTable.getInstance().syncCache(key,dummyItem, 0);
+	    return true;
+	}
+	else{
+	    return false;
+	}
+	
+    }
+    
+    public static NoSQLConnection getInstance(){
         return INSTANCE;
     }
     

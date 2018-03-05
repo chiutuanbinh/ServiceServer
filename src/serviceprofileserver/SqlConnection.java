@@ -17,14 +17,14 @@ import sun.security.jca.GetInstance;
  *
  * @author root
  */
-public final class sqlConnection {
+public final class SqlConnection {
     private static final int MAX_CONNECTION = 10;
     
-    private static final sqlConnection INSTANCE = new sqlConnection();
+    private static final SqlConnection INSTANCE = new SqlConnection();
     
     private Connection connection;
     
-    private sqlConnection(){
+    private SqlConnection(){
         String url = "jdbc:mysql://localhost:3306/javabase";
         String username = "java";
         String password = "123456";
@@ -45,12 +45,12 @@ public final class sqlConnection {
             throw new IllegalStateException("Cannot connect the database!", e);
         }
     }
-    
-    public boolean saveToDB(profileInfo saveItem){
+    //save the item to the DB
+    public boolean saveToDB(ProfileInfo saveItem){
         try{
 	    Statement stmt = connection.createStatement();
         
-	    day saveItemDay = saveItem.birthday;
+	    Day saveItemDay = saveItem.birthday;
 	    String date = Integer.toString(saveItemDay.date);
 	    String month = Integer.toString(saveItemDay.month);
 	    String year = Integer.toString(saveItemDay.year);
@@ -66,9 +66,10 @@ public final class sqlConnection {
         }
         return true;
     }
-    public profileInfo getFromDB(String key) {
+    //load the item from the DB
+    public ProfileInfo getFromDB(String key) {
 	
-        profileInfo returnValue = null;
+        ProfileInfo returnValue = null;
 	try {
 	    ResultSet rs;
 	    Statement stmt;
@@ -78,9 +79,9 @@ public final class sqlConnection {
 	    
 	    if (!rs.next())
 		return null;
-	    returnValue = new profileInfo(rs.getString("name"), 
+	    returnValue = new ProfileInfo(rs.getString("name"), 
 		rs.getString("email"), rs.getString("phoneNumber"), 
-		new day(rs.getDate("birthDay").getDate(), 
+		new Day(rs.getDate("birthDay").getDate(), 
 			rs.getDate("birthDay").getMonth(),
 			rs.getDate("birthDay").getYear()), 
 		rs.getString("id"));
@@ -92,7 +93,11 @@ public final class sqlConnection {
 	return returnValue;
         
     }
-    public static sqlConnection getInstance(){
+    //update the item in the DB 
+    //TODO: implement
+    //remove the item from the DB
+    //TODO: implement
+    public static SqlConnection getInstance(){
         return INSTANCE;
     }
     @Override
