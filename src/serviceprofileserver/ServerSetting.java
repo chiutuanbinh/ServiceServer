@@ -21,7 +21,7 @@ public final class ServerSetting {
     private ServerSetting(){
 	
 	String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-String appConfigPath = rootPath + "app.properties";
+	String appConfigPath = rootPath + "app.properties";
 	File file = new File(appConfigPath);
 	try {
 	    if (!file.exists()){

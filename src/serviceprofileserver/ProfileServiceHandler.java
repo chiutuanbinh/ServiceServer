@@ -18,47 +18,25 @@ public class ProfileServiceHandler implements ProfileService.Iface{
     
     @Override
     public boolean setProfile(ProfileInfo profile) throws TException{
-        boolean success = false;
-	
-	try{
-	HashTable.getInstance().setVal(profile.id, profile);
-                success = true;
-	}
-	catch(Exception e){
-	    e.printStackTrace();
-	}
-	
-//        int savingOption = 1;
-//        switch (savingOption){
-//            case 0: //using hash table
-//                
-//                break;
-//            case 1: //using mysql
-//                sqlConnection.getInstance().saveToDB(profile);
-//		success = true;
-//                break;
-//            case 2: //using nosql
-//                noSQLConnection.getInstance().saveToDB(profile);
-//                success = true;
-//                break;
-//            default:
-//        }
-        //System.out.println(ServiceProfileServer.infoHashtable);
-        return success;
+        return HashTable.getInstance().setVal(profile.id, profile);
     }
     
     
     @Override
     public ProfileInfo getProfile(String id) throws TException{
-        ProfileInfo result = new ProfileInfo("null", "null", "null", new Day(), "null");
-	try{
-	    result = HashTable.getInstance().getVal(id);    
-	}
-	catch(Exception e){
-	    e.printStackTrace();
-	}
+        ProfileInfo result = HashTable.getInstance().getVal(id);    
+
 	if (result == null)
 	    result = new ProfileInfo("null", "null", "null", new Day(), "null");
 	return result;
+    }
+    
+    @Override 
+    public boolean removeProfile(String id) throws TException{
+	return HashTable.getInstance().removeVal(id);
+    }
+    @Override
+    public boolean updateProfile(ProfileInfo profile) throws TException{
+	return HashTable.getInstance().updateVal(profile);
     }
 }

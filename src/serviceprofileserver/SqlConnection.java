@@ -43,6 +43,7 @@ public final class SqlConnection {
     private SqlConnection(){
         
     }
+    
     private Connection getConnection()throws SQLException{
 	return DATA_SOURCE.getConnection();
     }
@@ -62,9 +63,8 @@ public final class SqlConnection {
                     month + "-" + 
                     date +"\');");
         }
-        catch(Exception e) {
-            //e.printStackTrace();
-	    System.out.println("Dupplicated record");
+        catch(SQLException e) {
+            e.printStackTrace();
 	    return false;
         }
         return true;
@@ -110,6 +110,7 @@ public final class SqlConnection {
 		    + "\', birthDay =\'" + year + "-" + month + "-" + date + "\';";
 		    
 	    stmt.executeUpdate(updateSQL);
+	    HashTable.getInstance().syncCache(year, updateItem, 1);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;
@@ -123,6 +124,7 @@ public final class SqlConnection {
 	    String deleteSQL = "DELETE FROM \'javabase\' "
 		    + "WHERE id = \'" + key + "\';";
 	    stmt.executeUpdate(deleteSQL);
+	    HashTable.getInstance().syncCache(key, null, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;

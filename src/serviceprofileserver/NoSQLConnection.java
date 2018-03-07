@@ -54,7 +54,6 @@ public final class NoSQLConnection {
 	    return false;
     }
     //remove the item from the DB
-    //TODO: implemet the removeMethod
     public boolean removeFromDB(String key){
 	if (db.remove(key.getBytes())){
 	    ProfileInfo dummyItem = new ProfileInfo();

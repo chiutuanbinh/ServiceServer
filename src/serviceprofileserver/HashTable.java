@@ -5,13 +5,8 @@
  */
 package serviceprofileserver;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 /**
  *
  * @author root
@@ -32,19 +27,22 @@ public final class HashTable {
         return INSTANCE;
     }
     
-    public boolean setVal(String key, ProfileInfo element) throws Exception{
+    public boolean setVal(String key, ProfileInfo element) {
+	//Adjust the cache
+	boolean result = false;
 	this.syncCache(key, element,2);
+	
 	if (DBSetting.equals("NoSQL")){
-	    NoSQLConnection.getInstance().saveToDB(element);
+	    result = NoSQLConnection.getInstance().saveToDB(element);
 	}
 	else if (DBSetting.equals("MySQL")){
-	    SqlConnection.getInstance().saveToDB(element);
+	    result = SqlConnection.getInstance().saveToDB(element);
 	}
-	return true;
+	return result;
     }
     
     
-    public ProfileInfo getVal(String key) throws Exception{
+    public ProfileInfo getVal(String key){
 	ProfileInfo result = null;
 	//The cache have the data
 	if (this.infoTable.containsKey(key)){
@@ -74,16 +72,44 @@ public final class HashTable {
     }
     
     
+    public boolean updateVal(ProfileInfo element){
+	String eleKey = element.id;
+	boolean result = false;
+	if (this.infoTable.containsKey(eleKey)){
+	    this.LRUQueue.remove(eleKey);
+	    this.LRUQueue.addFirst(eleKey);
+	    this.infoTable.remove(eleKey);
+	    this.infoTable.putIfAbsent(eleKey, element);
+	}
+	if (DBSetting.equals("NoSQL")){
+	    result = NoSQLConnection.getInstance().updateToDB(element);
+	}
+	else if (DBSetting.equals("MySQL")){
+	    result = SqlConnection.getInstance().updateToDB(element);
+	}
+	return result;
+    }
+    
     public boolean removeVal(String key){
-	
-	return true;
+	boolean result = false;
+	if (this.infoTable.containsKey(key)){
+	    this.LRUQueue.remove(key);
+	    this.infoTable.remove(key);
+	    this.cacheSize -= 1;
+	}
+	if (DBSetting.equals("NoSQL")){
+	    result = NoSQLConnection.getInstance().removeFromDB(key);
+	}
+	else if (DBSetting.equals("MySQL")){
+	    result = SqlConnection.getInstance().removeFromDB(key);
+	}  
+	return result;
     }
     
     
-    //Update the cache when a value is delete from the database or change 
-    //TODO
+    //Update the cache when a value is delete from the database or change, change it when db is set or look up
     //@opType is 0 for removeOp, is 1 for updateOp, other if save or get
-    public boolean syncCache(String key, ProfileInfo item, int opType){
+    public synchronized boolean  syncCache(String key, ProfileInfo item, int opType){
 	switch (opType){
 	    case 0:
 		if (this.infoTable.containsKey(key)){
@@ -114,16 +140,23 @@ public final class HashTable {
 		}
 		break;
 	    default:
-		if (this.cacheSize == MAX_CACHE_SIZE){
-		    String removedKeyString = this.LRUQueue.removeLast();
+		//fix the case where duplicate data is put into hashtable
+		if (this.infoTable.containsKey(key)){
+		    this.LRUQueue.remove(key);
 		    this.LRUQueue.addFirst(key);
-		    this.infoTable.remove(removedKeyString);
-		    this.infoTable.put(key, item);
 		}
-		else {
-		    this.LRUQueue.addFirst(key);
-		    this.infoTable.put(key, item);
-		    this.cacheSize += 1;
+		else{
+		    if (this.cacheSize == MAX_CACHE_SIZE){
+			String removedKeyString = this.LRUQueue.removeLast();
+			this.LRUQueue.addFirst(key);
+			this.infoTable.remove(removedKeyString);
+			this.infoTable.put(key, item);
+		    }
+		    else {
+			this.LRUQueue.addFirst(key);
+			this.infoTable.put(key, item);
+			this.cacheSize += 1;
+		    }
 		}
 	}
 	return true;
