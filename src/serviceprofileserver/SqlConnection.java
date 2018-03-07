@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import org.apache.commons.dbcp2.BasicDataSource;
 import sun.security.jca.GetInstance;
 
 /**
@@ -18,38 +19,38 @@ import sun.security.jca.GetInstance;
  * @author root
  */
 public final class SqlConnection {
-    private static final int MAX_CONNECTION = 10;
-    
-    private static final SqlConnection INSTANCE = new SqlConnection();
-    
-    private Connection connection;
-    
-    private SqlConnection(){
-        String url = "jdbc:mysql://localhost:3306/javabase";
+    private static final int INIT_CONNECTION = 3;
+    private static final BasicDataSource DATA_SOURCE ;
+    static {
+	DATA_SOURCE =  new BasicDataSource();
+	String url = "jdbc:mysql://localhost:3306/javabase";
         String username = "java";
         String password = "123456";
+	String driverClassName = "com.mysql.jdbc.Driver";
         
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("Driver loaded!");
-        } 
-        catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Cannot find the driver in the classpath!", e);
-        }
+        DATA_SOURCE.setUrl(url);
+	DATA_SOURCE.setDriverClassName(driverClassName);
+	DATA_SOURCE.setUsername(username);
+	DATA_SOURCE.setPassword(password);
+	DATA_SOURCE.setInitialSize(INIT_CONNECTION);
+    }
+    private static final SqlConnection INSTANCE = new SqlConnection();
+    
+    
+    
+    
+    
+    private SqlConnection(){
         
-        try {
-            connection = DriverManager.getConnection(url, username, password);
-            System.out.println("Database connected!");
-        }       
-        catch (SQLException e) {
-            throw new IllegalStateException("Cannot connect the database!", e);
-        }
+    }
+    private Connection getConnection()throws SQLException{
+	return DATA_SOURCE.getConnection();
     }
     //save the item to the DB
     public boolean saveToDB(ProfileInfo saveItem){
-        try{
-	    Statement stmt = connection.createStatement();
-        
+        try (Connection connection = this.getConnection();
+		Statement stmt = connection.createStatement()){
+
 	    Day saveItemDay = saveItem.birthday;
 	    String date = Integer.toString(saveItemDay.date);
 	    String month = Integer.toString(saveItemDay.month);
@@ -62,7 +63,9 @@ public final class SqlConnection {
                     date +"\');");
         }
         catch(Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+	    System.out.println("Dupplicated record");
+	    return false;
         }
         return true;
     }
@@ -70,13 +73,11 @@ public final class SqlConnection {
     public ProfileInfo getFromDB(String key) {
 	
         ProfileInfo returnValue = null;
-	try {
+	try (Connection connection = this.getConnection();
+		Statement stmt = connection.createStatement()
+		){
 	    ResultSet rs;
-	    Statement stmt;
-	
-	    stmt = connection.createStatement();
 	    rs = stmt.executeQuery("SELECT * FROM userProfile WHERE id =\'" + key+"\';");
-	    
 	    if (!rs.next())
 		return null;
 	    returnValue = new ProfileInfo(rs.getString("name"), 
@@ -94,15 +95,41 @@ public final class SqlConnection {
         
     }
     //update the item in the DB 
-    //TODO: implement
     public boolean updateToDB(ProfileInfo updateItem){
+	try (Connection connection = this.getConnection();
+		Statement stmt = connection.createStatement()){
+	    Day updateItemDay = updateItem.birthday;
+	    String date = Integer.toString(updateItemDay.date);
+	    String month = Integer.toString(updateItemDay.month);
+	    String year = Integer.toString(updateItemDay.year);
+	    String updateSQL = "UPDATE \'javabase\' "
+		    + "SET id = \'" + updateItem.id 
+		    + "\', name = \'" + updateItem.userName
+		    + "\', email = \'" + updateItem.email
+		    + "\', phoneNumber = \'" + updateItem.phoneNumber
+		    + "\', birthDay =\'" + year + "-" + month + "-" + date + "\';";
+		    
+	    stmt.executeUpdate(updateSQL);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    return false;
+	}
 	return true;
     }
     //remove the item from the DB
-    //TODO: implement
     public boolean removeFromDB(String key){
+	try (Connection connection = this.getConnection();
+		Statement stmt = connection.createStatement()){
+	    String deleteSQL = "DELETE FROM \'javabase\' "
+		    + "WHERE id = \'" + key + "\';";
+	    stmt.executeUpdate(deleteSQL);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    return false;
+	}
 	return true;
     }
+    
     
     public static SqlConnection getInstance(){
         return INSTANCE;
@@ -110,7 +137,7 @@ public final class SqlConnection {
     @Override
     protected void finalize() throws Throwable{
         try {
-            connection.close();
+            DATA_SOURCE.close();
         }
         finally{
             super.finalize();

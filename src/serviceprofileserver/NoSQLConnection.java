@@ -45,7 +45,6 @@ public final class NoSQLConnection {
 	}
     }
     //update the item in the DB to a new value
-    //TODO: implement the updateMethod
     public boolean updateToDB(ProfileInfo updateItem){
 	if (db.set(updateItem.id.getBytes(), SerializationUtils.serialize(updateItem))){
 	    HashTable.getInstance().syncCache(updateItem.id, updateItem, 1);

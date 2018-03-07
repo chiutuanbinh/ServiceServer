@@ -6,7 +6,9 @@
 package serviceprofileserver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -15,27 +17,33 @@ import java.util.Properties;
  */
 public final class ServerSetting {
     private static final ServerSetting INSTANCE = new ServerSetting();
-    private static String DB_Type = "NoSQL"; 
+    private String DB_Type = "NoSQL"; 
     private ServerSetting(){
+	
 	String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-	String appConfigPath = rootPath + "setting.properties";
+String appConfigPath = rootPath + "app.properties";
 	File file = new File(appConfigPath);
-	if (!file.exists()){
-	    try {
+	try {
+	    if (!file.exists()){
+
 		Properties initSetting = new Properties();
 		initSetting.setProperty("DB_Type", "NoSQL");
 		initSetting.store(new FileWriter(appConfigPath), "default setting");
-	    } catch (Exception e) {
-		e.printStackTrace();
-	    }    
-	}
-	else {
+
+	    }
 	    Properties propReader = new Properties();
-	    DB_Type = propReader.getProperty("DB_Type", "NoSQL");
-	}
+	    propReader.load(new FileInputStream(appConfigPath));
+	    this.DB_Type = propReader.getProperty("DB_Type", "NoSQL");
+	} catch (Exception e) {
+		e.printStackTrace();
+	}    
     }
-    public static String getDBType(){
-	return DB_Type;
+    public String getDBType(){
+	System.out.println(this.DB_Type);
+	return this.DB_Type;
+    }
+    public static ServerSetting getInstance(){
+	return INSTANCE;
     }
     
 }

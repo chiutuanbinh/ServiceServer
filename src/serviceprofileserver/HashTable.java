@@ -22,7 +22,7 @@ public final class HashTable {
     private LinkedList<String> LRUQueue;
     private static final int MAX_CACHE_SIZE = 20;
     private int cacheSize = 0;
-    private final String DBSetting = ServerSetting.getDBType();
+    private final String DBSetting = ServerSetting.getInstance().getDBType();
     private HashTable(int i){
         infoTable = new HashMap<>(i);
 	LRUQueue = new LinkedList<>();
@@ -70,7 +70,7 @@ public final class HashTable {
 	    //Adjust the cache table
 	    this.syncCache(key, result, 2);
 	}
-	return null;
+	return result;
     }
     
     
