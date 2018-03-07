@@ -18,7 +18,7 @@ public final class NoSQLConnection {
         db = new DB();
         
         //open the database
-        if (!db.open("userProfile.kch", DB.OWRITER | DB.OCREATE)){
+        if (!db.open("userProfile.kch", DB.OWRITER | DB.OCREATE | DB.OREADER)){
             System.err.println("open error: " + db.error());
         }
 //        db.set("1".getBytes(), SerializationUtils.serialize(new profileInfo("A", "A@abc", "922323", new day(12, 12, 1983), "1")));
@@ -26,9 +26,9 @@ public final class NoSQLConnection {
     }
     //save to Db, transform the profileInfo Obj into byte stream data
     public boolean saveToDB(ProfileInfo saveItem){
-        byte[] bKey = saveItem.id.getBytes();
+        byte[] bKey = SerializationUtils.serialize(saveItem.id);
         byte[] bSaveItem = SerializationUtils.serialize(saveItem);
-        if (!db.add(bKey, bSaveItem))
+        if (db.add(bKey, bSaveItem))
             return true;
         return false;
     }
@@ -39,7 +39,8 @@ public final class NoSQLConnection {
 	    return null;
 	}
 	else{
-	    ProfileInfo item = (ProfileInfo)SerializationUtils.deserialize(bItem);
+	    //Object o = SerializationUtils.deserialize(bItem);
+	    ProfileInfo item = (ProfileInfo) SerializationUtils.deserialize(bItem);
 	    return item;
 	}
     }

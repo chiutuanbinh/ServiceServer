@@ -57,6 +57,8 @@ public class ProfileServiceHandler implements ProfileService.Iface{
 	catch(Exception e){
 	    e.printStackTrace();
 	}
+	if (result == null)
+	    result = new ProfileInfo("null", "null", "null", new Day(), "null");
 	return result;
     }
 }
