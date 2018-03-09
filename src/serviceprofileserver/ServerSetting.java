@@ -17,31 +17,41 @@ import java.util.Properties;
  */
 public final class ServerSetting {
     private static final ServerSetting INSTANCE = new ServerSetting();
-    private String DB_Type = "NoSQL"; 
+    private static String DB_TypeString = "DB_Type";
+    private static String DB_Type = "NoSQL"; 
+    private static String NoSQLPoolSizeString = "NoSQLPoolSize";
+    private static String NoSQLPoolSize = "5";
+    private static String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+    private static String appConfigPath = rootPath + "app.properties";
     private ServerSetting(){
 	
-	String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-	String appConfigPath = rootPath + "app.properties";
+	
 	File file = new File(appConfigPath);
 	try {
 	    if (!file.exists()){
 
 		Properties initSetting = new Properties();
-		initSetting.setProperty("DB_Type", "NoSQL");
+		initSetting.setProperty(DB_TypeString, "NoSQL");
+		initSetting.setProperty(NoSQLPoolSizeString, "5");
 		initSetting.store(new FileWriter(appConfigPath), "default setting");
 
 	    }
 	    Properties propReader = new Properties();
 	    propReader.load(new FileInputStream(appConfigPath));
-	    this.DB_Type = propReader.getProperty("DB_Type", "NoSQL");
+	    DB_Type = propReader.getProperty(DB_TypeString, "NoSQL");
+	    NoSQLPoolSize = propReader.getProperty(NoSQLPoolSizeString, "5");
 	} catch (Exception e) {
 		e.printStackTrace();
 	}    
     }
-    public String getDBType(){
-	System.out.println(this.DB_Type);
-	return this.DB_Type;
+    public static String getDBType(){
+	System.out.println(DB_Type);
+	return DB_Type;
     }
+    public static String getNoSQLPoolSize(){
+	return NoSQLPoolSize;
+    }
+    
     public static ServerSetting getInstance(){
 	return INSTANCE;
     }

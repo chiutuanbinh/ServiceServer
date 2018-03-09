@@ -9,61 +9,120 @@ package serviceprofileserver;
  *
  * @author root
  */
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import kyotocabinet.*;
 import org.apache.commons.lang.SerializationUtils;
 public final class NoSQLConnection {
+    
+    private static final int POOL_SIZE = Integer.parseInt(ServerSetting.getNoSQLPoolSize());
+    private static BlockingQueue<DB> dbPool = new LinkedBlockingQueue<>(POOL_SIZE);
+    
+    private static String dbPath = "userProfile.kch";
+    
+    
     private static final NoSQLConnection INSTANCE = new NoSQLConnection();
-    private static DB db;
+    
     private NoSQLConnection(){
-        db = new DB();
-        
-        //open the database
-        if (!db.open("userProfile.kch", DB.OWRITER | DB.OCREATE | DB.OREADER)){
-            System.err.println("open error: " + db.error());
-        }
-//        db.set("1".getBytes(), SerializationUtils.serialize(new profileInfo("A", "A@abc", "922323", new day(12, 12, 1983), "1")));
-//        db.set("2".getBytes(), SerializationUtils.serialize(new profileInfo("B", "B@abc", "345678", new day(1, 1, 1888), "2")));
+	
+	//Init the Connection Pool 
+	for (int i = 0; i < POOL_SIZE ; i ++) {
+	    DB dbi = new DB();
+	    dbi.open(dbPath, DB.OWRITER | DB.OCREATE | DB.OREADER );
+	    try {
+		dbPool.put(dbi);
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
+	    
+	}
+	System.out.println("NoSQL connections established");
     }
+    
+    
     //save to Db, transform the profileInfo Obj into byte stream data
     public boolean saveToDB(ProfileInfo saveItem){
-        byte[] bKey = SerializationUtils.serialize(saveItem.id);
-        byte[] bSaveItem = SerializationUtils.serialize(saveItem);
-        if (db.add(bKey, bSaveItem))
-            return true;
-        return false;
+	
+//        byte[] bKey = saveItem.id.getBytes();
+//        byte[] bSaveItem = SerializationUtils.serialize(saveItem);
+	boolean succeed = false;
+        try {
+	    DB conn = dbPool.take();
+	    //System.out.println("get a connection W");
+	    if (conn.add(saveItem.id, Util.ProfileInfoToString(saveItem))){
+//		System.out.println("Trying to return the connection W");
+		dbPool.offer(conn);
+//		System.out.println("return the connection W" + Util.ObjToString(saveItem));
+		succeed = true;
+	    }
+	    else{
+		dbPool.offer(conn);
+//		System.out.println("return the connection W,failed");
+	    }
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+        return succeed;
     }
+    
+    
     //get from Db, turn the stream data back to obj
     public ProfileInfo getFromBD(String key){
-        byte[] bItem = db.get(key.getBytes());
-	if (bItem == null){
-	    return null;
+	ProfileInfo result = null;
+	try {
+	    DB conn = dbPool.take();
+	    System.out.println("get a connection");
+	    String Item = conn.get(key);
+	    if (Item == null){
+		dbPool.offer(conn);
+		System.out.println("return the connection, not found");
+	    }
+	    else{
+		//Object o = SerializationUtils.deserialize(bItem);
+		result = Util.StringToProfileInfo(Item);
+		dbPool.offer(conn);
+		System.out.println("return the connection");
+	    }
+	} catch (Exception e) {
 	}
-	else{
-	    //Object o = SerializationUtils.deserialize(bItem);
-	    ProfileInfo item = (ProfileInfo) SerializationUtils.deserialize(bItem);
-	    return item;
-	}
+        return result;
     }
+    
+
     //update the item in the DB to a new value
     public boolean updateToDB(ProfileInfo updateItem){
-	if (db.set(updateItem.id.getBytes(), SerializationUtils.serialize(updateItem))){
-	    HashTable.getInstance().syncCache(updateItem.id, updateItem, 1);
-	    return true;
-	}
-	else
-	    return false;
-    }
-    //remove the item from the DB
-    public boolean removeFromDB(String key){
-	if (db.remove(key.getBytes())){
-	    ProfileInfo dummyItem = new ProfileInfo();
-	    HashTable.getInstance().syncCache(key,dummyItem, 0);
-	    return true;
-	}
-	else{
-	    return false;
+	boolean result = false;
+	try {
+	    DB conn = dbPool.take();
+	    if (conn.set(updateItem.id, Util.ProfileInfoToString(updateItem))){
+		HashTable.getInstance().syncCache(updateItem.id, updateItem, 1);
+		result = true;
+	    }
+	    dbPool.offer(conn);
+	} catch (Exception e) {
 	}
 	
+	return result;
+	
+    }
+    
+
+    //remove the item from the DB
+    public boolean removeFromDB(String key){
+	boolean result = false;
+	try {
+	    DB conn = dbPool.take();
+	
+	    if (conn.remove(key)){
+		ProfileInfo dummyItem = new ProfileInfo();
+		HashTable.getInstance().syncCache(key,dummyItem, 0);
+		result = true;
+	    }
+	    dbPool.offer(conn);
+	} catch (Exception e) {
+	}
+	
+	return result;
     }
     
     public static NoSQLConnection getInstance(){
@@ -73,7 +132,10 @@ public final class NoSQLConnection {
     @Override
     protected void finalize() throws Throwable{
         try {
-            db.close();
+            for (int i = 0; i < POOL_SIZE; i++) {
+		dbPool.take().close();
+	    }
+	    dbPool.clear();
         } 
         finally {
             super.finalize();

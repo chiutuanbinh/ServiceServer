@@ -6,11 +6,9 @@
 package serviceprofileserver;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.server.AbstractNonblockingServer;
 import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TSimpleServer;
-import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.TServerSocket;
@@ -50,11 +48,18 @@ public class ServiceProfileServer {
 		e.printStackTrace();
 	}
     }
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
+	
+	//start DB Connections
+	SqlConnection.getInstance();
+	NoSQLConnection.getInstance();
+	ServerSetting.getInstance();
+	TestDataFromKCB.printall();
         //StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
 	StartNoBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
     }

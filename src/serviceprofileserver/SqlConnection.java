@@ -23,7 +23,7 @@ public final class SqlConnection {
     private static final BasicDataSource DATA_SOURCE ;
     static {
 	DATA_SOURCE =  new BasicDataSource();
-	String url = "jdbc:mysql://localhost:3306/javabase";
+	String url = "jdbc:mysql://localhost:3306/javabase?autoReconnect=true&useSSL=false";
         String username = "java";
         String password = "123456";
 	String driverClassName = "com.mysql.jdbc.Driver";
@@ -33,7 +33,15 @@ public final class SqlConnection {
 	DATA_SOURCE.setUsername(username);
 	DATA_SOURCE.setPassword(password);
 	DATA_SOURCE.setInitialSize(INIT_CONNECTION);
+	
+	System.out.println("SQL connections established");
     }
+    
+    private static final String NAME = "name";
+    private static final String MAIL = "email";
+    private static final String PHONE = "phoneNumber";
+    private static final String ID = "id";
+    private static final String BDAY = "birthDay";
     private static final SqlConnection INSTANCE = new SqlConnection();
     
     
@@ -56,15 +64,17 @@ public final class SqlConnection {
 	    String date = Integer.toString(saveItemDay.date);
 	    String month = Integer.toString(saveItemDay.month);
 	    String year = Integer.toString(saveItemDay.year);
-            stmt.executeUpdate("INSERT INTO userProfile VALUES (\'" +
+	    String sqlQuery = "INSERT INTO userProfile VALUES (\'" +
                     saveItem.id + "\',\'" + saveItem.userName + "\',\'" + 
                     saveItem.email + "\',\'" + saveItem.phoneNumber + "\',\'" +
                     year + "-"+ 
                     month + "-" + 
-                    date +"\');");
+                    date +"\');";
+	    
+            stmt.executeUpdate(sqlQuery);
         }
         catch(SQLException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
 	    return false;
         }
         return true;
@@ -80,12 +90,12 @@ public final class SqlConnection {
 	    rs = stmt.executeQuery("SELECT * FROM userProfile WHERE id =\'" + key+"\';");
 	    if (!rs.next())
 		return null;
-	    returnValue = new ProfileInfo(rs.getString("name"), 
-		rs.getString("email"), rs.getString("phoneNumber"), 
-		new Day(rs.getDate("birthDay").getDate(), 
-			rs.getDate("birthDay").getMonth(),
-			rs.getDate("birthDay").getYear()), 
-		rs.getString("id"));
+	    returnValue = new ProfileInfo(rs.getString(NAME), 
+		rs.getString(MAIL), rs.getString(PHONE), 
+		new Day(rs.getDate(BDAY).getDate(), 
+			rs.getDate(BDAY).getMonth(),
+			rs.getDate(BDAY).getYear()), 
+		rs.getString(ID));
 
 	} catch (Exception e) {
 	    e.printStackTrace();

@@ -17,27 +17,23 @@ public final class HashTable {
     private LinkedList<String> LRUQueue;
     private static final int MAX_CACHE_SIZE = 20;
     private int cacheSize = 0;
-    private final String DBSetting = ServerSetting.getInstance().getDBType();
+    private final String DBSetting = ServerSetting.getDBType();
     private HashTable(int i){
         infoTable = new HashMap<>(i);
 	LRUQueue = new LinkedList<>();
     }
     
-    public static HashTable getInstance(){
+    public synchronized static HashTable getInstance(){
         return INSTANCE;
     }
     
     public boolean setVal(String key, ProfileInfo element) {
 	//Adjust the cache
-	boolean result = false;
+	boolean result = true;
 	this.syncCache(key, element,2);
-	
-	if (DBSetting.equals("NoSQL")){
-	    result = NoSQLConnection.getInstance().saveToDB(element);
-	}
-	else if (DBSetting.equals("MySQL")){
-	    result = SqlConnection.getInstance().saveToDB(element);
-	}
+	SyncToDB saveSync = new SyncToDB(0, element, key);
+	saveSync.start();
+	//System.out.println("the after instruction");
 	return result;
     }
     
@@ -80,14 +76,19 @@ public final class HashTable {
 	    this.LRUQueue.addFirst(eleKey);
 	    this.infoTable.remove(eleKey);
 	    this.infoTable.putIfAbsent(eleKey, element);
+	    SyncToDB updateSync = new SyncToDB(1, element, eleKey);
+	    updateSync.start();
+	    return true;
 	}
-	if (DBSetting.equals("NoSQL")){
-	    result = NoSQLConnection.getInstance().updateToDB(element);
+	else{
+	    if (DBSetting.equals("NoSQL")){
+		result = NoSQLConnection.getInstance().updateToDB(element);
+	    }
+	    else if (DBSetting.equals("MySQL")){
+		result = SqlConnection.getInstance().updateToDB(element);
+	    }
+	    return result;
 	}
-	else if (DBSetting.equals("MySQL")){
-	    result = SqlConnection.getInstance().updateToDB(element);
-	}
-	return result;
     }
     
     public boolean removeVal(String key){
@@ -96,20 +97,24 @@ public final class HashTable {
 	    this.LRUQueue.remove(key);
 	    this.infoTable.remove(key);
 	    this.cacheSize -= 1;
+	    SyncToDB removeSync = new SyncToDB(2, null, key);
+	    removeSync.start();
 	}
-	if (DBSetting.equals("NoSQL")){
-	    result = NoSQLConnection.getInstance().removeFromDB(key);
+	else{
+	    if (DBSetting.equals("NoSQL")){
+		result = NoSQLConnection.getInstance().removeFromDB(key);
+	    }
+	    else if (DBSetting.equals("MySQL")){
+		result = SqlConnection.getInstance().removeFromDB(key);
+	    }     
 	}
-	else if (DBSetting.equals("MySQL")){
-	    result = SqlConnection.getInstance().removeFromDB(key);
-	}  
 	return result;
     }
     
     
     //Update the cache when a value is delete from the database or change, change it when db is set or look up
     //@opType is 0 for removeOp, is 1 for updateOp, other if save or get
-    public synchronized boolean  syncCache(String key, ProfileInfo item, int opType){
+    public synchronized boolean syncCache(String key, ProfileInfo item, int opType){
 	switch (opType){
 	    case 0:
 		if (this.infoTable.containsKey(key)){
@@ -160,5 +165,49 @@ public final class HashTable {
 		}
 	}
 	return true;
+    }
+    
+    private class SyncToDB extends Thread{
+	int opType;
+	ProfileInfo data;
+	String dataKey;
+	
+	public SyncToDB(int caller, ProfileInfo inputData, String inputKey){
+	    this.opType = caller;
+	    this.data = inputData;
+	    this.dataKey = inputKey;
+	}
+	
+	@Override
+	public void run(){
+	    //System.out.println("DataBase Sync Thread Start");
+	    switch (this.opType){
+	    case 0:// save operation
+		if (DBSetting.equals("NoSQL")){
+		    NoSQLConnection.getInstance().saveToDB(data);
+		}
+		else if (DBSetting.equals("MySQL")){
+		    SqlConnection.getInstance().saveToDB(data);
+		}
+		break;
+	    case 1: // update operation
+		if (DBSetting.equals("NoSQL")){
+		    NoSQLConnection.getInstance().updateToDB(data);
+		}
+		else if (DBSetting.equals("MySQL")){
+		    SqlConnection.getInstance().updateToDB(data);
+		}
+		break;
+	    case 2: // remove operation
+		if (DBSetting.equals("NoSQL")){
+		    NoSQLConnection.getInstance().removeFromDB(dataKey);
+		}
+		else if (DBSetting.equals("MySQL")){
+		    SqlConnection.getInstance().removeFromDB(dataKey);
+		}
+		
+	    }
+	    
+	}
     }
 }
