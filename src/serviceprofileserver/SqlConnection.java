@@ -19,14 +19,14 @@ import sun.security.jca.GetInstance;
  * @author root
  */
 public final class SqlConnection {
-    private static final int INIT_CONNECTION = 3;
+    private static final int INIT_CONNECTION = ServerSetting.getConnectionPoolSize();
     private static final BasicDataSource DATA_SOURCE ;
     static {
 	DATA_SOURCE =  new BasicDataSource();
-	String url = "jdbc:mysql://localhost:3306/javabase?autoReconnect=true&useSSL=false";
-        String username = "java";
-        String password = "123456";
-	String driverClassName = "com.mysql.jdbc.Driver";
+	String url = ServerSetting.getSqlUrl();
+        String username = ServerSetting.getSqlUsername();
+        String password = ServerSetting.getSqlPassword();
+	String driverClassName = ServerSetting.getSqlDriverClassName();
         
         DATA_SOURCE.setUrl(url);
 	DATA_SOURCE.setDriverClassName(driverClassName);

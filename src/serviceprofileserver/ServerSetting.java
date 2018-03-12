@@ -15,12 +15,30 @@ import java.util.Properties;
  *
  * @author root
  */
-public final class ServerSetting {
-    private static final ServerSetting INSTANCE = new ServerSetting();
-    private static String DB_TypeString = "DB_Type";
-    private static String DB_Type = "NoSQL"; 
-    private static String NoSQLPoolSizeString = "NoSQLPoolSize";
-    private static String NoSQLPoolSize = "5";
+public final class  ServerSetting {
+    
+    private static String dBTypeString = "DB_Type";
+    private static String dBType = "NoSQL"; 
+    
+    private static String connectionPoolSizeString = "ConnectionPoolSize";
+    private static String connectionPoolSize = "5";
+    
+    private static String maxLRUSizeString = "LRULimit";
+    private static String maxLRUSize = "20";
+    
+    private static String sqlUrlString = "Url";
+    private static String sqlUrl = "jdbc:mysql://localhost:3306/javabase?autoReconnect=true&useSSL=false";
+    
+    private static String sqlUsernameString = "Username";
+    private static String sqlUsername = "java";
+    
+    private static String sqlPasswordString = "Password";
+    private static String sqlPassword = "123456";
+    
+    private static String sqlDriverClassNameString = "DriverClassName";
+    private static String sqlDriverClassName = "com.mysql.jdbc.Driver";
+    
+    
     private static String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
     private static String appConfigPath = rootPath + "app.properties";
     private ServerSetting(){
@@ -31,29 +49,48 @@ public final class ServerSetting {
 	    if (!file.exists()){
 
 		Properties initSetting = new Properties();
-		initSetting.setProperty(DB_TypeString, "NoSQL");
-		initSetting.setProperty(NoSQLPoolSizeString, "5");
+		initSetting.setProperty(dBTypeString, dBType);
+		initSetting.setProperty(connectionPoolSizeString, connectionPoolSize);
+		initSetting.setProperty(maxLRUSizeString, maxLRUSize);
+		initSetting.setProperty(sqlUrlString, sqlUrl);
+		initSetting.setProperty(sqlUsernameString, sqlUsername);
+		initSetting.setProperty(sqlPasswordString, sqlPassword);
+		initSetting.setProperty(sqlDriverClassNameString, sqlDriverClassName);
 		initSetting.store(new FileWriter(appConfigPath), "default setting");
-
 	    }
 	    Properties propReader = new Properties();
 	    propReader.load(new FileInputStream(appConfigPath));
-	    DB_Type = propReader.getProperty(DB_TypeString, "NoSQL");
-	    NoSQLPoolSize = propReader.getProperty(NoSQLPoolSizeString, "5");
+	    dBType = propReader.getProperty(dBTypeString, dBType);
+	    connectionPoolSize = propReader.getProperty(connectionPoolSizeString, connectionPoolSize);
+	    maxLRUSize = propReader.getProperty(maxLRUSizeString,maxLRUSize);
+	    sqlUrl = propReader.getProperty(sqlUrlString,sqlUrl);
+	    sqlUsername = propReader.getProperty(sqlUsernameString,sqlUsername);
+	    sqlPassword = propReader.getProperty(sqlPasswordString,sqlPassword);
+	    sqlDriverClassName = propReader.getProperty(sqlDriverClassNameString, sqlDriverClassName);
 	} catch (Exception e) {
 		e.printStackTrace();
 	}    
     }
     public static String getDBType(){
-	System.out.println(DB_Type);
-	return DB_Type;
+	return dBType;
     }
-    public static String getNoSQLPoolSize(){
-	return NoSQLPoolSize;
+    public static int getConnectionPoolSize(){
+	return Integer.parseInt(connectionPoolSize);
     }
-    
-    public static ServerSetting getInstance(){
-	return INSTANCE;
+    public static int getMaxLRUSize(){
+	return Integer.parseInt(maxLRUSize);
     }
-    
+    public static String getSqlUrl(){
+	return sqlUrl;
+    }
+    public static String getSqlUsername(){
+	return sqlUsername;
+    }
+    public static String getSqlPassword(){
+	return sqlPassword;
+    }
+    public static String getSqlDriverClassName(){
+	return sqlDriverClassName;
+    }
+
 }

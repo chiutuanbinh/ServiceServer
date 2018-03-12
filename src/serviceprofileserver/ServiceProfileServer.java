@@ -58,8 +58,6 @@ public class ServiceProfileServer {
 	//start DB Connections
 	SqlConnection.getInstance();
 	NoSQLConnection.getInstance();
-	ServerSetting.getInstance();
-	TestDataFromKCB.printall();
         //StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
 	StartNoBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
     }

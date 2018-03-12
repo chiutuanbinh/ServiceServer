@@ -12,14 +12,14 @@ import java.util.LinkedList;
  * @author root
  */
 public final class HashTable {
-    private static final HashTable INSTANCE = new HashTable(20);
+    private static final HashTable INSTANCE = new HashTable();
     private HashMap<String,ProfileInfo> infoTable ;
     private LinkedList<String> LRUQueue;
-    private static final int MAX_CACHE_SIZE = 20;
+    private static final int MAX_CACHE_SIZE = ServerSetting.getMaxLRUSize();
     private int cacheSize = 0;
     private final String DBSetting = ServerSetting.getDBType();
-    private HashTable(int i){
-        infoTable = new HashMap<>(i);
+    private HashTable(){
+        infoTable = new HashMap<>(MAX_CACHE_SIZE);
 	LRUQueue = new LinkedList<>();
     }
     

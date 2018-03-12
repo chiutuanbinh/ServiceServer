@@ -15,7 +15,7 @@ import kyotocabinet.*;
 import org.apache.commons.lang.SerializationUtils;
 public final class NoSQLConnection {
     
-    private static final int POOL_SIZE = Integer.parseInt(ServerSetting.getNoSQLPoolSize());
+    private static final int POOL_SIZE = ServerSetting.getConnectionPoolSize();
     private static BlockingQueue<DB> dbPool = new LinkedBlockingQueue<>(POOL_SIZE);
     
     private static String dbPath = "userProfile.kch";
@@ -43,8 +43,6 @@ public final class NoSQLConnection {
     //save to Db, transform the profileInfo Obj into byte stream data
     public boolean saveToDB(ProfileInfo saveItem){
 	
-//        byte[] bKey = saveItem.id.getBytes();
-//        byte[] bSaveItem = SerializationUtils.serialize(saveItem);
 	boolean succeed = false;
         try {
 	    DB conn = dbPool.take();
@@ -57,7 +55,6 @@ public final class NoSQLConnection {
 	    }
 	    else{
 		dbPool.offer(conn);
-//		System.out.println("return the connection W,failed");
 	    }
 	} catch (Exception e) {
 	    e.printStackTrace();
@@ -78,7 +75,6 @@ public final class NoSQLConnection {
 		System.out.println("return the connection, not found");
 	    }
 	    else{
-		//Object o = SerializationUtils.deserialize(bItem);
 		result = Util.StringToProfileInfo(Item);
 		dbPool.offer(conn);
 		System.out.println("return the connection");

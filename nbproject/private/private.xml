@@ -14,7 +14,7 @@
         <group>
             <file>file:/root/NetBeansProjects/ServiceProfileServer/src/serviceprofileserver/HashTable.java</file>
             <file>file:/root/NetBeansProjects/ServiceProfileServer/src/serviceprofileserver/NoSQLConnection.java</file>
-            <file>file:/root/NetBeansProjects/ServiceProfileServer/src/org/apache/thrift/server/AbstractNonblockingServer.java</file>
+            <file>file:/root/NetBeansProjects/ServiceProfileServer/src/serviceprofileserver/ServerSetting.java</file>
             <file>file:/root/NetBeansProjects/ServiceProfileServer/src/serviceprofileserver/ServiceProfileServer.java</file>
         </group>
     </open-files>
