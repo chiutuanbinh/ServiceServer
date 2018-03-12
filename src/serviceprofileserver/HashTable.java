@@ -7,21 +7,26 @@ package serviceprofileserver;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 /**
  *
  * @author root
  */
 public final class HashTable {
-    private static final HashTable INSTANCE = new HashTable();
+    
     private HashMap<String,ProfileInfo> infoTable ;
     private LinkedList<String> LRUQueue;
     private static final int MAX_CACHE_SIZE = ServerSetting.getMaxLRUSize();
     private int cacheSize = 0;
     private final String DBSetting = ServerSetting.getDBType();
+    private static final HashTable INSTANCE = new HashTable();
     private HashTable(){
         infoTable = new HashMap<>(MAX_CACHE_SIZE);
 	LRUQueue = new LinkedList<>();
     }
+    
+    private ExecutorService executor = Executors.newFixedThreadPool(100);
     
     public synchronized static HashTable getInstance(){
         return INSTANCE;
@@ -32,7 +37,7 @@ public final class HashTable {
 	boolean result = true;
 	this.syncCache(key, element,2);
 	SyncToDB saveSync = new SyncToDB(0, element, key);
-	saveSync.start();
+	executor.submit(saveSync);
 	//System.out.println("the after instruction");
 	return result;
     }
@@ -77,7 +82,7 @@ public final class HashTable {
 	    this.infoTable.remove(eleKey);
 	    this.infoTable.putIfAbsent(eleKey, element);
 	    SyncToDB updateSync = new SyncToDB(1, element, eleKey);
-	    updateSync.start();
+	    executor.submit(updateSync);
 	    return true;
 	}
 	else{
@@ -98,7 +103,7 @@ public final class HashTable {
 	    this.infoTable.remove(key);
 	    this.cacheSize -= 1;
 	    SyncToDB removeSync = new SyncToDB(2, null, key);
-	    removeSync.start();
+	   executor.submit(removeSync);
 	}
 	else{
 	    if (DBSetting.equals("NoSQL")){
@@ -167,7 +172,7 @@ public final class HashTable {
 	return true;
     }
     
-    private class SyncToDB extends Thread{
+    private class SyncToDB implements Runnable{
 	int opType;
 	ProfileInfo data;
 	String dataKey;

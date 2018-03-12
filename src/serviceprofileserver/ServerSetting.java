@@ -41,6 +41,7 @@ public final class  ServerSetting {
     
     private static String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
     private static String appConfigPath = rootPath + "app.properties";
+    public static final ServerSetting INSTANCE = new ServerSetting();
     private ServerSetting(){
 	
 	
@@ -58,6 +59,7 @@ public final class  ServerSetting {
 		initSetting.setProperty(sqlDriverClassNameString, sqlDriverClassName);
 		initSetting.store(new FileWriter(appConfigPath), "default setting");
 	    }
+	    
 	    Properties propReader = new Properties();
 	    propReader.load(new FileInputStream(appConfigPath));
 	    dBType = propReader.getProperty(dBTypeString, dBType);

@@ -72,6 +72,7 @@ public final class SqlConnection {
                     date +"\');";
 	    
             stmt.executeUpdate(sqlQuery);
+	    System.out.println("added" + saveItem.id);
         }
         catch(SQLException e) {
             //e.printStackTrace();

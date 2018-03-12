@@ -9,6 +9,7 @@ package serviceprofileserver;
  *
  * @author root
  */
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import kyotocabinet.*;
@@ -17,7 +18,6 @@ public final class NoSQLConnection {
     
     private static final int POOL_SIZE = ServerSetting.getConnectionPoolSize();
     private static BlockingQueue<DB> dbPool = new LinkedBlockingQueue<>(POOL_SIZE);
-    
     private static String dbPath = "userProfile.kch";
     
     
@@ -68,16 +68,16 @@ public final class NoSQLConnection {
 	ProfileInfo result = null;
 	try {
 	    DB conn = dbPool.take();
-	    System.out.println("get a connection");
+//	    System.out.println("get a connection");
 	    String Item = conn.get(key);
 	    if (Item == null){
 		dbPool.offer(conn);
-		System.out.println("return the connection, not found");
+//		System.out.println("return the connection, not found");
 	    }
 	    else{
 		result = Util.StringToProfileInfo(Item);
 		dbPool.offer(conn);
-		System.out.println("return the connection");
+//		System.out.println("return the connection");
 	    }
 	} catch (Exception e) {
 	}

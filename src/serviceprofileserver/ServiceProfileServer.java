@@ -27,7 +27,7 @@ public class ServiceProfileServer {
             TServerTransport serverTransport = new TServerSocket(9696);
             TServer server = new TSimpleServer(
                     new TServer.Args(serverTransport).processor(processor));
-            System.out.println("Starting the server - ready to serve");
+            System.out.println("Starting a Simple Server - ready");
             server.serve();
 	    
         }
