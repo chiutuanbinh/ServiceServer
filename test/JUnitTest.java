@@ -57,14 +57,14 @@ public class JUnitTest {
     // @Test
     // public void hello() {}
     @Test
-    public void loadingProperties(){
+    public void loadPropertiesShouldBeCorrect(){
 	System.out.println(ServerSetting.getDBType());
 	System.out.println(ServerSetting.getConnectionPoolSize());
     }
     
     
     @Test
-    public void addData(){
+    public void addDataShouldNotBringUpExceptions(){
 	SqlConnection sqlconn = SqlConnection.getInstance();
 	HashTable cache = HashTable.getInstance();
 	File fl = new File("output.txt");
@@ -93,5 +93,11 @@ public class JUnitTest {
 	}
 	
     }
+    
+//    @Test
+//    public void recentlyAddedDataShouldBeOnCache(){
+//	HashTable cache = HashTable.getInstance();
+//	cache.setVal("e", new ProfileInfo("a", "b", "c", "d", id))
+//    }
 }
 
