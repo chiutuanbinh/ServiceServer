@@ -9,11 +9,9 @@ package serviceprofileserver;
  *
  * @author root
  */
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import kyotocabinet.*;
-import org.apache.commons.lang.SerializationUtils;
 public final class NoSQLConnection {
     
     private static final int POOL_SIZE = ServerSetting.getConnectionPoolSize();
@@ -81,6 +79,7 @@ public final class NoSQLConnection {
 	    }
 	} catch (Exception e) {
 	}
+	Cache.getInstance().syncCache(key, result, 2);
         return result;
     }
     
@@ -91,11 +90,12 @@ public final class NoSQLConnection {
 	try {
 	    DB conn = dbPool.take();
 	    if (conn.set(updateItem.id, Util.ProfileInfoToString(updateItem))){
-		HashTable.getInstance().syncCache(updateItem.id, updateItem, 1);
+		Cache.getInstance().syncCache(updateItem.id, updateItem, 1);
 		result = true;
 	    }
 	    dbPool.offer(conn);
-	} catch (Exception e) {
+	} catch (Exception e){
+	    e.printStackTrace();
 	}
 	
 	return result;
@@ -111,11 +111,12 @@ public final class NoSQLConnection {
 	
 	    if (conn.remove(key)){
 		ProfileInfo dummyItem = new ProfileInfo();
-		HashTable.getInstance().syncCache(key,dummyItem, 0);
+		Cache.getInstance().syncCache(key,dummyItem, 0);
 		result = true;
 	    }
 	    dbPool.offer(conn);
 	} catch (Exception e) {
+	    e.printStackTrace();
 	}
 	
 	return result;

@@ -6,36 +6,45 @@
 package serviceprofileserver;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 /**
  *
  * @author root
  */
-public final class HashTable {
+public final class Cache {
     
     private HashMap<String,Node> infoTable ;
     private CustomLinkedList<ProfileInfo> LRUQueue;
     private static final int MAX_CACHE_SIZE = ServerSetting.getMaxLRUSize();
     private int cacheSize = 0;
     private final String DBSetting = ServerSetting.getDBType();
-    private static final HashTable INSTANCE = new HashTable();
-    private HashTable(){
+    private static final Cache INSTANCE = new Cache();
+    private Cache(){
         infoTable = new HashMap<>(MAX_CACHE_SIZE);
 	LRUQueue = new CustomLinkedList<>();
     }
     
     private ExecutorService executor = Executors.newFixedThreadPool(100);
     
-    public synchronized static HashTable getInstance(){
+    public static Cache getInstance(){
         return INSTANCE;
     }
     
     public boolean setVal(String key, ProfileInfo element) {
 	//Adjust the cache
 	boolean result = true;
-	this.syncCache(key, element,2);
+	if (this.cacheSize == MAX_CACHE_SIZE){
+	    ProfileInfo lastNodeItem = this.LRUQueue.removeLast();
+	    this.infoTable.remove(lastNodeItem.id);
+	    this.LRUQueue.addFirst(element);
+	    this.infoTable.put(key, this.LRUQueue.getFirstNode());
+	}
+	else{
+	    this.LRUQueue.addFirst(element);
+	    this.infoTable.put(key, this.LRUQueue.getFirstNode());
+	    this.cacheSize ++;
+	}
 	SyncToDB saveSync = new SyncToDB(0, element, key);
 	executor.submit(saveSync);
 	//System.out.println("the after instruction");
@@ -67,7 +76,7 @@ public final class HashTable {
 		}
 	    }
 	    //Adjust the cache table
-	    this.syncCache(key, result, 2);
+//	    this.syncCache(key, result, 2); already done in database connection layer
 	}
 	return result;
     }
@@ -123,15 +132,60 @@ public final class HashTable {
     //Update the cache when a value is delete from the database or change, change it when db is set or look up
     //@opType is 0 for removeOp, is 1 for updateOp, other if save or get
     public synchronized boolean syncCache(String key, ProfileInfo item, int opType){
+	if (item == null)
+	    return false;
 	switch (opType){
 	    case 0:
+		//in case some client fetch the old data to cache before it could be 
+		//deleted from the DB.
+		//remove it again 
+		if (this.infoTable.containsKey(key)){ 
+		    Node<ProfileInfo> rmNode = this.infoTable.remove(key);
+		    this.LRUQueue.remove(rmNode);
+		    this.cacheSize--;
+		}
+		break;
 		
 	    case 1:
-		//if it is already in queue
+		//in case some client fetch the old data to cache before it could be 
+		//updated in the DB
+		//refetch it
+		//if the cache doesn't have the data, fetch it
+		if (this.infoTable.containsKey(key)){
+		    Node<ProfileInfo> oldNode = this.infoTable.get(key);
+		    this.LRUQueue.setElement(oldNode,item);
+		}
+		else{
+		    if (this.cacheSize == MAX_CACHE_SIZE){
+			String rmNodeKey = this.LRUQueue.removeLast().id;
+			this.infoTable.remove(rmNodeKey);
+		    }
+		    else{
+			this.cacheSize ++;
+		    }
+		    this.LRUQueue.addFirst(item);
+		    this.infoTable.put(key, this.LRUQueue.getFirstNode());
+		}
+		break;
 		
-	    default:
-		//fix the case where duplicate data is put into hashtable
-		
+	    case 2:
+		/*If the data is fetch from the database since client cant get it
+		from cache
+		*/
+		if (this.infoTable.containsKey(key))
+		    break;
+		else{
+		    if (this.cacheSize == MAX_CACHE_SIZE){
+			String rmNodeKey = this.LRUQueue.removeLast().id;
+			this.infoTable.remove(rmNodeKey);
+		    }
+		    else{
+			this.cacheSize ++;
+		    }
+		    this.LRUQueue.addFirst(item);
+		    this.infoTable.put(key, this.LRUQueue.getFirstNode());
+		}
+		break;
 	}
 	return true;
     }
@@ -178,5 +232,11 @@ public final class HashTable {
 	    }
 	    
 	}
+    }
+    
+    
+    //for debug purpose
+    public HashMap getHashMap(){
+	return this.infoTable;
     }
 }

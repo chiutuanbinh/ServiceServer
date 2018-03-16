@@ -18,13 +18,13 @@ public class ProfileServiceHandler implements ProfileService.Iface{
     
     @Override
     public boolean setProfile(ProfileInfo profile) throws TException{
-        return HashTable.getInstance().setVal(profile.id, profile);
+        return Cache.getInstance().setVal(profile.id, profile);
     }
     
     
     @Override
     public ProfileInfo getProfile(String id) throws TException{
-        ProfileInfo result = HashTable.getInstance().getVal(id);    
+        ProfileInfo result = Cache.getInstance().getVal(id);    
 
 	if (result == null)
 	    result = new ProfileInfo("null", "null", "null", new Day(), "null");
@@ -33,10 +33,10 @@ public class ProfileServiceHandler implements ProfileService.Iface{
     
     @Override 
     public boolean removeProfile(String id) throws TException{
-	return HashTable.getInstance().removeVal(id);
+	return Cache.getInstance().removeVal(id);
     }
     @Override
     public boolean updateProfile(ProfileInfo profile) throws TException{
-	return HashTable.getInstance().updateVal(profile);
+	return Cache.getInstance().updateVal(profile);
     }
 }
