@@ -72,7 +72,6 @@ public final class SqlConnection {
                     date +"\');";
 	    
             stmt.executeUpdate(sqlQuery);
-	    System.out.println("added " + saveItem.id);
         }
         catch(SQLException e) {
             //e.printStackTrace();
@@ -137,7 +136,6 @@ public final class SqlConnection {
 		    + "WHERE id = \'" + key + "\';";
 	    stmt.executeUpdate(deleteSQL);
 	    Cache.getInstance().syncCache(key, null, 0);
-	    System.out.println("removed " + key);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;

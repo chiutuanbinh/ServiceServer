@@ -20,6 +20,9 @@ public final class Cache {
     private int cacheSize = 0;
     private final String DBSetting = ServerSetting.getDBType();
     private static final Cache INSTANCE = new Cache();
+    private final NoSQLConnection noSQLConnection = NoSQLConnection.getInstance();
+    private final SqlConnection sqlConnection = SqlConnection.getInstance();
+    
     private Cache(){
         infoTable = new HashMap<>(MAX_CACHE_SIZE);
 	LRUQueue = new CustomLinkedList<>();
@@ -27,23 +30,26 @@ public final class Cache {
     
     private ExecutorService executor = Executors.newFixedThreadPool(100);
     
-    public static Cache getInstance(){
+    public static synchronized Cache getInstance(){
         return INSTANCE;
     }
     
     public boolean setVal(String key, ProfileInfo element) {
-	//Adjust the cache
 	boolean result = true;
-	if (this.cacheSize == MAX_CACHE_SIZE){
+	if (this.infoTable.containsKey(key))
+		return false;
+	else if (this.cacheSize == MAX_CACHE_SIZE){
 	    ProfileInfo lastNodeItem = this.LRUQueue.removeLast();
 	    this.infoTable.remove(lastNodeItem.id);
 	    this.LRUQueue.addFirst(element);
-	    this.infoTable.put(key, this.LRUQueue.getFirstNode());
+	    Node<ProfileInfo> firstNode = this.LRUQueue.getFirstNode();
+	    this.infoTable.put(key, firstNode);
 	}
 	else{
-	    this.LRUQueue.addFirst(element);
-	    this.infoTable.put(key, this.LRUQueue.getFirstNode());
-	    this.cacheSize ++;
+		this.LRUQueue.addFirst(element);
+		Node<ProfileInfo> firstNode = this.LRUQueue.getFirstNode();
+		this.infoTable.put(key, firstNode);
+		this.cacheSize ++;
 	}
 	SyncToDB saveSync = new SyncToDB(0, element, key);
 	executor.submit(saveSync);
@@ -63,14 +69,14 @@ public final class Cache {
 	else {
 	    //Cannot find the data, read the properties file to know where to look for the data
 	    if (DBSetting.equals("NoSQL")){
-		result = NoSQLConnection.getInstance().getFromBD(key);
+		result = noSQLConnection.getFromBD(key);
 		if (result == null){
 		    return result;
 		}
 		
 	    }
 	    else if (DBSetting.equals("MySQL")){
-		result = SqlConnection.getInstance().getFromDB(key);
+		result = sqlConnection.getFromDB(key);
 		if (result == null){
 		    return result;
 		}
@@ -96,10 +102,10 @@ public final class Cache {
 	}
 	else{
 	    if (DBSetting.equals("NoSQL")){
-		result = NoSQLConnection.getInstance().updateToDB(element);
+		result = noSQLConnection.updateToDB(element);
 	    }
 	    else if (DBSetting.equals("MySQL")){
-		result = SqlConnection.getInstance().updateToDB(element);
+		result = sqlConnection.updateToDB(element);
 	    }
 	    return result;
 	}
@@ -108,10 +114,12 @@ public final class Cache {
     public boolean removeVal(String key){
 	boolean result = false;
 	if (this.infoTable.containsKey(key)){
-
+	    
 	    Node<ProfileInfo> eleNode = this.infoTable.get(key);
-	    this.infoTable.remove(key);
+	    //System.out.println(eleNode);
 	    this.LRUQueue.remove(eleNode);
+	    this.infoTable.remove(key);
+	    
 	    
 	    this.cacheSize -= 1;
 	    SyncToDB removeSync = new SyncToDB(2, null, key);
@@ -119,10 +127,10 @@ public final class Cache {
 	}
 	else{
 	    if (DBSetting.equals("NoSQL")){
-		result = NoSQLConnection.getInstance().removeFromDB(key);
+		result = noSQLConnection.removeFromDB(key);
 	    }
 	    else if (DBSetting.equals("MySQL")){
-		result = SqlConnection.getInstance().removeFromDB(key);
+		result = sqlConnection.removeFromDB(key);
 	    }     
 	}
 	return result;
@@ -131,7 +139,7 @@ public final class Cache {
     
     //Update the cache when a value is delete from the database or change, change it when db is set or look up
     //@opType is 0 for removeOp, is 1 for updateOp, other if save or get
-    public synchronized boolean syncCache(String key, ProfileInfo item, int opType){
+    public boolean syncCache(String key, ProfileInfo item, int opType){
 	if (item == null)
 	    return false;
 	switch (opType){
@@ -140,8 +148,9 @@ public final class Cache {
 		//deleted from the DB.
 		//remove it again 
 		if (this.infoTable.containsKey(key)){ 
-		    Node<ProfileInfo> rmNode = this.infoTable.remove(key);
+		    Node<ProfileInfo> rmNode = this.infoTable.get(key);
 		    this.LRUQueue.remove(rmNode);
+		    this.infoTable.remove(key);
 		    this.cacheSize--;
 		}
 		break;
@@ -207,26 +216,26 @@ public final class Cache {
 	    switch (this.opType){
 	    case 0:// save operation
 		if (DBSetting.equals("NoSQL")){
-		    NoSQLConnection.getInstance().saveToDB(data);
+		    noSQLConnection.saveToDB(data);
 		}
 		else if (DBSetting.equals("MySQL")){
-		    SqlConnection.getInstance().saveToDB(data);
+		    sqlConnection.saveToDB(data);
 		}
 		break;
 	    case 1: // update operation
 		if (DBSetting.equals("NoSQL")){
-		    NoSQLConnection.getInstance().updateToDB(data);
+		    noSQLConnection.updateToDB(data);
 		}
 		else if (DBSetting.equals("MySQL")){
-		    SqlConnection.getInstance().updateToDB(data);
+		    sqlConnection.updateToDB(data);
 		}
 		break;
 	    case 2: // remove operation
 		if (DBSetting.equals("NoSQL")){
-		    NoSQLConnection.getInstance().removeFromDB(dataKey);
+		    noSQLConnection.removeFromDB(dataKey);
 		}
 		else if (DBSetting.equals("MySQL")){
-		    SqlConnection.getInstance().removeFromDB(dataKey);
+		    sqlConnection.removeFromDB(dataKey);
 		}
 		
 	    }

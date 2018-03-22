@@ -39,16 +39,15 @@ public final class  ServerSetting {
     private static String sqlDriverClassName = "com.mysql.jdbc.Driver";
     
     
-    private static String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-    private static String appConfigPath = rootPath + "app.properties";
+    private static String appConfigPath = "/root/NetBeansProjects/ServiceProfileServer/app.properties";
     public static final ServerSetting INSTANCE = new ServerSetting();
     private ServerSetting(){
 	
 	
 	File file = new File(appConfigPath);
 	try {
+	    //System.out.println(file.exists());
 	    if (!file.exists()){
-
 		Properties initSetting = new Properties();
 		initSetting.setProperty(dBTypeString, dBType);
 		initSetting.setProperty(connectionPoolSizeString, connectionPoolSize);

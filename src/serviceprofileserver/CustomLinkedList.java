@@ -20,31 +20,37 @@ public class CustomLinkedList<E> {
     }
 
     public void addFirst(E e) {
-	if (size == 0){
+	if (first == null){
 	    first = new Node<>(null,e,null);
 	    last = first;
 	}
 	else{
+	    
 	    Node<E> secondNode = first;
+	    
 	    first = new Node<>(null,e,secondNode);
 	    secondNode.prev = first;
+	    
 	}
 	size ++;
     }
 
     public E removeLast() {
-	if (last == null)
+	if (last == null){
 	    throw new NoSuchElementException();
-	else{
+	}
+	else
+	{
 	    Node<E> prevNode = last.prev;
+	    
 	    E element = last.item;
-	    last.item = null;
-	    last.prev = null;
+//	    last.item = null;
+//	    last.prev = null;
 	    last = prevNode;
-	    if (prevNode == null)
+	    if (last == null)
 		first = null;
 	    else
-		prevNode.next = null;
+		last.next = null;
 	    size --;
 	    return element;
 	}
@@ -57,13 +63,13 @@ public class CustomLinkedList<E> {
 	else{
 	    Node<E> nextNode = first.next;
 	    E element = first.item;
-	    first.next = null;
-	    first.item = null;
+//	    first.next = null;
+//	    first.item = null;
 	    first = nextNode;
-	    if (nextNode == null)
+	    if (first == null)
 		last = null;
 	    else
-		nextNode.prev = null;
+		first.prev = null;
 	    size --;
 	    return element;
 	}
@@ -83,11 +89,9 @@ public class CustomLinkedList<E> {
 	    Node<E> prevNode = removeNode.prev;
 	    Node<E> nextNode = removeNode.next;
 	    E element = removeNode.item;
-	    removeNode.prev = null;
-	    removeNode.next = null;
-	    removeNode.item = null;
 	    prevNode.next = nextNode;
 	    nextNode.prev = prevNode;
+	    size--;
 	    return element;
 	}
     }
@@ -101,7 +105,7 @@ public class CustomLinkedList<E> {
 	//it is the last node
 	else if (nextNode == null){
 	    last = prevNode;
-	    prevNode.next = null;
+	    last.next = null;
 	}
 	//general cases
 	else {

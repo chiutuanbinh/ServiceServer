@@ -65,43 +65,43 @@ public class CacheBasicLRUTest {
     //
     // @Test
     // public void hello() {}
-//    @Test
-//    public void loadPropertiesShouldBeCorrect(){
-//	System.out.println(ServerSetting.getDBType());
-//	System.out.println(ServerSetting.getConnectionPoolSize());
-//    }
+    @Test
+    public void loadPropertiesShouldBeCorrect(){
+	System.out.println(ServerSetting.getDBType());
+	System.out.println(ServerSetting.getConnectionPoolSize());
+    }
     
     
-//    @Test
-//    public void addDataShouldNotBringUpExceptions(){
-//	SqlConnection sqlconn = SqlConnection.getInstance();
-//	HashTable cache = HashTable.getInstance();
-//	File fl = new File("output.txt");
-//	try {
-//	    FileReader fr = new FileReader(fl);
-//	    BufferedReader br = new BufferedReader(fr);
-//	    String line = "";
-//	    int i = 0;
-//	    while ((line = br.readLine()) != null){
-//		String[] lineArray = line.split(",");
-//		int date = Integer.parseInt(lineArray[4]);
-//		int month = Integer.parseInt(lineArray[5]);
-//		int year = Integer.parseInt(lineArray[6]);
-//		ProfileInfo profileInfo = new ProfileInfo(lineArray[1], lineArray[2], lineArray[3], 
-//			new Day(date, month, year), lineArray[0]);
-//		
-//		cache.setVal(lineArray[0], profileInfo);
-//		System.out.println(++i + "");
-//		Thread.sleep(10);
-//	    }
-//	} catch (FileNotFoundException ex) {
-//	    Logger.getLogger(CacheBasicLRUTest.class.getName()).log(Level.SEVERE, null, ex);
-//	}
-//	catch(Exception e){
-//	    e.printStackTrace();
-//	}
-//	
-//    }
+    @Test
+    public void addDataShouldNotBringUpExceptions(){
+	SqlConnection sqlconn = SqlConnection.getInstance();
+	Cache cache = Cache.getInstance();
+	File fl = new File("output.txt");
+	try {
+	    FileReader fr = new FileReader(fl);
+	    BufferedReader br = new BufferedReader(fr);
+	    String line = "";
+	    int i = 0;
+	    while ((line = br.readLine()) != null){
+		String[] lineArray = line.split(",");
+		int date = Integer.parseInt(lineArray[4]);
+		int month = Integer.parseInt(lineArray[5]);
+		int year = Integer.parseInt(lineArray[6]);
+		ProfileInfo profileInfo = new ProfileInfo(lineArray[1], lineArray[2], lineArray[3], 
+			new Day(date, month, year), lineArray[0]);
+		
+		cache.setVal(lineArray[0], profileInfo);
+		System.out.println(++i + "");
+		Thread.sleep(10);
+	    }
+	} catch (FileNotFoundException ex) {
+	    Logger.getLogger(CacheBasicLRUTest.class.getName()).log(Level.SEVERE, null, ex);
+	}
+	catch(Exception e){
+	    e.printStackTrace();
+	}
+	
+    }
     
     @Test
     public void recentlyAddedValueShouldBeOnCache() throws InterruptedException{
@@ -116,7 +116,7 @@ public class CacheBasicLRUTest {
 	Thread.sleep(100);
 
     }
-    
+//    
     @Test
     public void theLeastRecentlyUsedValueShouldBeRemoved() throws InterruptedException{
 	cache.setVal(data0.id, data0);
@@ -131,7 +131,7 @@ public class CacheBasicLRUTest {
 	cache.removeVal(data3.id);
 	Thread.sleep(100);
     }
-    
+//    
     @Test
     public void RemovedValueShouldNotBeAccessibleFromCache() throws InterruptedException{
 	cache.setVal(data0.id, data0);
