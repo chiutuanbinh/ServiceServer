@@ -17,42 +17,62 @@ public final class NoSQLConnection {
     private static final int POOL_SIZE = ServerSetting.getConnectionPoolSize();
     private static BlockingQueue<DB> dbPool = new LinkedBlockingQueue<>(POOL_SIZE);
     private static String dbPath = "userProfile.kch";
-    
+    private int activeConnection = 0;
     
     private static final NoSQLConnection INSTANCE = new NoSQLConnection();
     
     private NoSQLConnection(){
 	
-	//Init the Connection Pool 
-	for (int i = 0; i < POOL_SIZE ; i ++) {
-	    DB dbi = new DB();
-	    dbi.open(dbPath, DB.OWRITER | DB.OCREATE | DB.OREADER );
-	    try {
-		dbPool.put(dbi);
-	    } catch (Exception e) {
-		e.printStackTrace();
-	    }
-	    
+	//Init the Connection Pool with one connection
+	DB dbi = new DB();
+	dbi.open(dbPath, DB.OWRITER | DB.OCREATE| DB.OREADER );
+	this.activeConnection ++;
+	try {
+	    dbPool.offer(dbi);
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
 	System.out.println("NoSQL connections established");
     }
     
+    private synchronized DB createConnection() throws InterruptedException{
+	if (activeConnection < POOL_SIZE){
+	    DB db = new DB();
+	    db.open(dbPath, DB.OWRITER | DB.OREADER );
+	    this.activeConnection ++;
+	    return db;
+	}
+	else {
+	    return dbPool.take();
+	}
+    
+    }
     
     //save to Db, transform the profileInfo Obj into byte stream data
     public boolean saveToDB(ProfileInfo saveItem){
 	
 	boolean succeed = false;
         try {
-	    DB conn = dbPool.take();
+	    DB conn = dbPool.poll();
+	    if (conn == null)
+		conn = createConnection();
 	    //System.out.println("get a connection W");
 	    if (conn.add(saveItem.id, Util.ProfileInfoToString(saveItem))){
 //		System.out.println("Trying to return the connection W");
-		dbPool.offer(conn);
+		boolean added = dbPool.offer(conn);
+		if (!added){
+		    conn.close();
+		    this.activeConnection --;
+		}
 //		System.out.println("return the connection W" + Util.ObjToString(saveItem));
 		succeed = true;
 	    }
 	    else{
-		dbPool.offer(conn);
+		boolean added = dbPool.offer(conn);
+		if (!added){
+		    conn.close();
+		    this.activeConnection --;
+		}
 	    }
 	} catch (Exception e) {
 	    e.printStackTrace();
@@ -65,16 +85,27 @@ public final class NoSQLConnection {
     public ProfileInfo getFromBD(String key){
 	ProfileInfo result = null;
 	try {
-	    DB conn = dbPool.take();
+	    DB conn = dbPool.poll();
+	    if (conn == null)
+		conn = createConnection();
 //	    System.out.println("get a connection");
 	    String Item = conn.get(key);
 	    if (Item == null){
-		dbPool.offer(conn);
+		
+		boolean added = dbPool.offer(conn);
+		if (!added){
+		    conn.close();
+		    this.activeConnection --;
+		}
 //		System.out.println("return the connection, not found");
 	    }
 	    else{
 		result = Util.StringToProfileInfo(Item);
-		dbPool.offer(conn);
+		boolean added = dbPool.offer(conn);
+		if (!added){
+		    conn.close();
+		    this.activeConnection --;
+		}
 //		System.out.println("return the connection");
 	    }
 	} catch (Exception e) {
@@ -88,12 +119,19 @@ public final class NoSQLConnection {
     public boolean updateToDB(ProfileInfo updateItem){
 	boolean result = false;
 	try {
-	    DB conn = dbPool.take();
+	    DB conn = dbPool.poll();
+	    if (conn == null){
+		conn = createConnection();
+	    }
 	    if (conn.set(updateItem.id, Util.ProfileInfoToString(updateItem))){
 		Cache.getInstance().syncCache(updateItem.id, updateItem, 1);
 		result = true;
 	    }
-	    dbPool.offer(conn);
+	    boolean added = dbPool.offer(conn);
+	    if (!added){
+		conn.close();
+		this.activeConnection --;
+	    }
 	} catch (Exception e){
 	    e.printStackTrace();
 	}
@@ -107,14 +145,21 @@ public final class NoSQLConnection {
     public boolean removeFromDB(String key){
 	boolean result = false;
 	try {
-	    DB conn = dbPool.take();
+	    DB conn = dbPool.poll();
+	    if (conn == null){
+		conn = createConnection();
+	    }
 	
 	    if (conn.remove(key)){
 		ProfileInfo dummyItem = new ProfileInfo();
 		Cache.getInstance().syncCache(key,dummyItem, 0);
 		result = true;
 	    }
-	    dbPool.offer(conn);
+	    boolean added = dbPool.offer(conn);
+	    if (!added){
+		conn.close();
+		this.activeConnection --;
+	    }
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -122,7 +167,7 @@ public final class NoSQLConnection {
 	return result;
     }
     
-    public static NoSQLConnection getInstance(){
+    public synchronized static NoSQLConnection getInstance(){
         return INSTANCE;
     }
     

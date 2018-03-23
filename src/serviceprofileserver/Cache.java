@@ -34,7 +34,7 @@ public final class Cache {
         return INSTANCE;
     }
     
-    public boolean setVal(String key, ProfileInfo element) {
+    public synchronized boolean setVal(String key, ProfileInfo element) {
 	boolean result = true;
 	if (this.infoTable.containsKey(key))
 		return false;
@@ -58,7 +58,7 @@ public final class Cache {
     }
     
     
-    public ProfileInfo getVal(String key){
+    public synchronized ProfileInfo getVal(String key){
 	ProfileInfo result = null;
 	//The cache have the data
 	if (this.infoTable.containsKey(key)){
@@ -88,7 +88,7 @@ public final class Cache {
     }
     
     
-    public boolean updateVal(ProfileInfo element){
+    public synchronized boolean updateVal(ProfileInfo element){
 	String eleKey = element.id;
 	boolean result = false;
 	if (this.infoTable.containsKey(eleKey)){
@@ -111,7 +111,7 @@ public final class Cache {
 	}
     }
     
-    public boolean removeVal(String key){
+    public synchronized boolean removeVal(String key){
 	boolean result = false;
 	if (this.infoTable.containsKey(key)){
 	    
@@ -139,7 +139,7 @@ public final class Cache {
     
     //Update the cache when a value is delete from the database or change, change it when db is set or look up
     //@opType is 0 for removeOp, is 1 for updateOp, other if save or get
-    public boolean syncCache(String key, ProfileInfo item, int opType){
+    public  boolean syncCache(String key, ProfileInfo item, int opType){
 	if (item == null)
 	    return false;
 	switch (opType){

@@ -5,6 +5,9 @@
  */
 package serviceprofileserver;
 
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
@@ -21,7 +24,7 @@ import org.apache.thrift.transport.TServerTransport;
  * @author root
  */
 public class ServiceProfileServer {
-
+    
     
     public static void StartSimpleServer(ProfileService.Processor<ProfileServiceHandler> processor){
         
@@ -39,7 +42,7 @@ public class ServiceProfileServer {
         
     }
     
-    public static void StartNoBlockingServer(ProfileService.Processor<ProfileServiceHandler> processor){
+    public static void StartNonBlockingServer(ProfileService.Processor<ProfileServiceHandler> processor){
 	try {
 	    TNonblockingServerTransport NBTransport = new TNonblockingServerSocket(9696);
 	    TServer server = new TNonblockingServer(new TNonblockingServer.Args(NBTransport).processor(processor));
@@ -51,7 +54,7 @@ public class ServiceProfileServer {
 	}
     }
     
-    public static void StartThreadedPoolSelectorServer(ProfileService.Processor<ProfileServiceHandler> processor){
+    public static void StartThreadedSelectorServer(ProfileService.Processor<ProfileServiceHandler> processor){
 	try {
 	    TNonblockingServerTransport TSTransport = new TNonblockingServerSocket(9696);
 	    TServer server = new TThreadedSelectorServer(new TThreadedSelectorServer.Args(TSTransport).processor(processor));
@@ -72,6 +75,16 @@ public class ServiceProfileServer {
 	}
     }
     
+    static AtomicLong totalGetTime = new AtomicLong(1);
+    static AtomicLong totalSetTime = new AtomicLong(1);
+    static AtomicLong totalRemoveTime = new AtomicLong(1);
+    static AtomicLong getReq = new AtomicLong(0);
+    static AtomicLong setReq = new AtomicLong(0);
+    static AtomicLong removeReq = new AtomicLong(0);
+    static AtomicLong lastGetTime = new AtomicLong(0);
+    static AtomicLong lastSetTime = new AtomicLong(0);
+    static AtomicLong lastRemoveTime = new AtomicLong(0);
+    
     /**
      * @param args the command line arguments
      */
@@ -81,10 +94,44 @@ public class ServiceProfileServer {
 	//start DB Connections
 	SqlConnection.getInstance();
 	NoSQLConnection.getInstance();
-        //StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
-	//StartNoBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
-	StartThreadedPoolSelectorServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
-	//StartThreadPoolServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
+	Measurer pMeasurer = new Measurer();
+	pMeasurer.start();
+//        StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
+//	StartNonBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
+	StartThreadedSelectorServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
+//	StartThreadPoolServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
+    }
+
+    public static class Measurer extends Thread{
+	public Measurer(){
+	}
+
+	@Override
+	public void run() {
+	    while(true){
+		try {
+		    sleep(30000);
+		} catch (InterruptedException ex) {
+		    Logger.getLogger(ServiceProfileServer.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		System.out.println("######################################");
+		System.out.println("SetReq = " + setReq);
+		System.out.println("TotalTimeSet = " + totalSetTime);
+		System.out.println("LastProcTime = " + lastSetTime);
+		System.out.println("AverageProcRate = " + setReq.get()*1000000/(totalSetTime.get()));
+
+		System.out.println("GetReq = " + getReq);
+		System.out.println("TotalTimeGet = " + totalGetTime);
+		System.out.println("LastProcTime = " + lastGetTime);
+		System.out.println("AverageProcRate = " + getReq.get()*1000000/(totalGetTime.get()));
+
+		System.out.println("RemvReq = " + removeReq);
+		System.out.println("TotalTimeRemove = " + totalRemoveTime);
+		System.out.println("LastProcTime = " + lastRemoveTime);
+		System.out.println("AverageTimeProcRate = " + removeReq.get()*1000000/(totalRemoveTime.get()));
+	    }
+	}
+	
     }
     
 }
