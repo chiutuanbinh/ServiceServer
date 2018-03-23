@@ -20,10 +20,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import serviceprofileserver.Day;
-import serviceprofileserver.Cache;
+import serviceprofileserver.CacheType1;
 import serviceprofileserver.NoSQLConnection;
 import serviceprofileserver.ProfileInfo;
-import serviceprofileserver.ProfileServiceHandler;
+import serviceprofileserver.ProfileServiceHandlerWithTimeMeasurer;
 import serviceprofileserver.ServerSetting;
 import serviceprofileserver.SqlConnection;
 
@@ -37,8 +37,8 @@ public class CacheBasicLRUTest {
     ProfileInfo data1 = new ProfileInfo("John Rambo", "Bo@gmail", "19961234", new Day(6, 9, 1969), "9999998");
     ProfileInfo data2 = new ProfileInfo("David Beckham", "Beck@gmail", "19006767", new Day(6, 9, 1968), "9999997");
     ProfileInfo data3 = new ProfileInfo("Nguyen Van A", "A@gmail", "18006083", new Day(6, 9, 1968), "9999996");
-    Cache cache = Cache.getInstance();
-    ProfileServiceHandler PSH = new ProfileServiceHandler();
+    CacheType1 cache = CacheType1.getInstance();
+    ProfileServiceHandlerWithTimeMeasurer PSH = new ProfileServiceHandlerWithTimeMeasurer();
     
     public CacheBasicLRUTest() {
     }
@@ -75,7 +75,7 @@ public class CacheBasicLRUTest {
     @Test
     public void addDataShouldNotBringUpExceptions(){
 	SqlConnection sqlconn = SqlConnection.getInstance();
-	Cache cache = Cache.getInstance();
+	CacheType1 cache = CacheType1.getInstance();
 	File fl = new File("output.txt");
 	try {
 	    FileReader fr = new FileReader(fl);

@@ -110,7 +110,7 @@ public final class NoSQLConnection {
 	    }
 	} catch (Exception e) {
 	}
-	Cache.getInstance().syncCache(key, result, 2);
+	CacheType1.getInstance().syncCache(key, result, 2);
         return result;
     }
     
@@ -124,7 +124,7 @@ public final class NoSQLConnection {
 		conn = createConnection();
 	    }
 	    if (conn.set(updateItem.id, Util.ProfileInfoToString(updateItem))){
-		Cache.getInstance().syncCache(updateItem.id, updateItem, 1);
+		CacheType1.getInstance().syncCache(updateItem.id, updateItem, 1);
 		result = true;
 	    }
 	    boolean added = dbPool.offer(conn);
@@ -152,7 +152,7 @@ public final class NoSQLConnection {
 	
 	    if (conn.remove(key)){
 		ProfileInfo dummyItem = new ProfileInfo();
-		Cache.getInstance().syncCache(key,dummyItem, 0);
+		CacheType1.getInstance().syncCache(key,dummyItem, 0);
 		result = true;
 	    }
 	    boolean added = dbPool.offer(conn);
@@ -167,7 +167,7 @@ public final class NoSQLConnection {
 	return result;
     }
     
-    public synchronized static NoSQLConnection getInstance(){
+    public static NoSQLConnection getInstance(){
         return INSTANCE;
     }
     

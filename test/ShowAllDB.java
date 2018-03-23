@@ -53,9 +53,12 @@ public class ShowAllDB {
 	
 	cs.jump();
 	String[] rec = null;
+	long count = 0;
 	while((rec = cs.get_str(true)) != null){
 	    System.out.println(rec[0]);
+	    count++;
 	}
+	System.out.print("#####" + count);
 	cs.disable();
 	db.close();
     }

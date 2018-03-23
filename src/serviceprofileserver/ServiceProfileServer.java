@@ -26,7 +26,7 @@ import org.apache.thrift.transport.TServerTransport;
 public class ServiceProfileServer {
     
     
-    public static void StartSimpleServer(ProfileService.Processor<ProfileServiceHandler> processor){
+    public static void StartSimpleServer(ProfileService.Processor<ProfileServiceHandlerWithTimeMeasurer> processor){
         
         try {
             TServerTransport serverTransport = new TServerSocket(9696);
@@ -42,7 +42,7 @@ public class ServiceProfileServer {
         
     }
     
-    public static void StartNonBlockingServer(ProfileService.Processor<ProfileServiceHandler> processor){
+    public static void StartNonBlockingServer(ProfileService.Processor<ProfileServiceHandlerWithTimeMeasurer> processor){
 	try {
 	    TNonblockingServerTransport NBTransport = new TNonblockingServerSocket(9696);
 	    TServer server = new TNonblockingServer(new TNonblockingServer.Args(NBTransport).processor(processor));
@@ -54,7 +54,7 @@ public class ServiceProfileServer {
 	}
     }
     
-    public static void StartThreadedSelectorServer(ProfileService.Processor<ProfileServiceHandler> processor){
+    public static void StartThreadedSelectorServer(ProfileService.Processor<ProfileServiceHandlerWithTimeMeasurer> processor){
 	try {
 	    TNonblockingServerTransport TSTransport = new TNonblockingServerSocket(9696);
 	    TServer server = new TThreadedSelectorServer(new TThreadedSelectorServer.Args(TSTransport).processor(processor));
@@ -65,7 +65,7 @@ public class ServiceProfileServer {
 	}
     }
     
-    public static void StartThreadPoolServer(ProfileService.Processor<ProfileServiceHandler> processor){
+    public static void StartThreadPoolServer(ProfileService.Processor<ProfileServiceHandlerWithTimeMeasurer> processor){
 	try {
 	    TServerTransport transport = new TServerSocket(9696);
 	    TThreadPoolServer server = new TThreadPoolServer(new TThreadPoolServer.Args(transport).processor(processor));
@@ -96,10 +96,10 @@ public class ServiceProfileServer {
 	NoSQLConnection.getInstance();
 	Measurer pMeasurer = new Measurer();
 	pMeasurer.start();
-//        StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
-//	StartNonBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
-	StartThreadedSelectorServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
-//	StartThreadPoolServer(new ProfileService.Processor<>(new ProfileServiceHandler()));
+//        StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
+//	StartNonBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
+	StartThreadedSelectorServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
+//	StartThreadPoolServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
     }
 
     public static class Measurer extends Thread{
@@ -118,17 +118,17 @@ public class ServiceProfileServer {
 		System.out.println("SetReq = " + setReq);
 		System.out.println("TotalTimeSet = " + totalSetTime);
 		System.out.println("LastProcTime = " + lastSetTime);
-		System.out.println("AverageProcRate = " + setReq.get()*1000000/(totalSetTime.get()));
+		System.out.println("AverageProcRate = " + setReq.get()/(totalSetTime.get()));
 
 		System.out.println("GetReq = " + getReq);
 		System.out.println("TotalTimeGet = " + totalGetTime);
 		System.out.println("LastProcTime = " + lastGetTime);
-		System.out.println("AverageProcRate = " + getReq.get()*1000000/(totalGetTime.get()));
+		System.out.println("AverageProcRate = " + getReq.get()/(totalGetTime.get()));
 
 		System.out.println("RemvReq = " + removeReq);
 		System.out.println("TotalTimeRemove = " + totalRemoveTime);
 		System.out.println("LastProcTime = " + lastRemoveTime);
-		System.out.println("AverageTimeProcRate = " + removeReq.get()*1000000/(totalRemoveTime.get()));
+		System.out.println("AverageTimeProcRate = " + removeReq.get()/(totalRemoveTime.get()));
 	    }
 	}
 	

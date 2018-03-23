@@ -20,11 +20,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import serviceprofileserver.Cache;
+import serviceprofileserver.CacheType1;
 import serviceprofileserver.Day;
 import serviceprofileserver.NoSQLConnection;
 import serviceprofileserver.ProfileInfo;
-import serviceprofileserver.ProfileServiceHandler;
+import serviceprofileserver.ProfileServiceHandlerWithTimeMeasurer;
 import serviceprofileserver.SqlConnection;
 
 /**
@@ -52,8 +52,8 @@ public class PerformanceTestWithCache {
 	    e.printStackTrace();
 	}
     }
-    ProfileServiceHandler processor = new ProfileServiceHandler();
-    Cache cache = Cache.getInstance();
+    ProfileServiceHandlerWithTimeMeasurer processor = new ProfileServiceHandlerWithTimeMeasurer();
+    CacheType1 cache = CacheType1.getInstance();
     NoSQLConnection dbConn = NoSQLConnection.getInstance();
     public PerformanceTestWithCache() {
     }

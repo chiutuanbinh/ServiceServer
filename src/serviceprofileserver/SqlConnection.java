@@ -101,7 +101,7 @@ public final class SqlConnection {
 	    e.printStackTrace();
 	}
 	//System.out.println(returnValue.toString());
-	Cache.getInstance().syncCache(key, returnValue, 2);
+	CacheType1.getInstance().syncCache(key, returnValue, 2);
 	return returnValue;
         
     }
@@ -121,7 +121,7 @@ public final class SqlConnection {
 		    + "\', birthDay =\'" + year + "-" + month + "-" + date + "\';";
 		    
 	    stmt.executeUpdate(updateSQL);
-	    Cache.getInstance().syncCache(year, updateItem, 1);
+	    CacheType1.getInstance().syncCache(year, updateItem, 1);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;
@@ -135,7 +135,7 @@ public final class SqlConnection {
 	    String deleteSQL = "DELETE FROM userProfile "
 		    + "WHERE id = \'" + key + "\';";
 	    stmt.executeUpdate(deleteSQL);
-	    Cache.getInstance().syncCache(key, null, 0);
+	    CacheType1.getInstance().syncCache(key, null, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;
