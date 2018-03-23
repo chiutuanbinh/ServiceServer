@@ -118,17 +118,17 @@ public class ServiceProfileServer {
 		System.out.println("SetReq = " + setReq);
 		System.out.println("TotalTimeSet = " + totalSetTime);
 		System.out.println("LastProcTime = " + lastSetTime);
-		System.out.println("AverageProcRate = " + setReq.get()/(totalSetTime.get()));
+		System.out.println("AverageProcRate = " + setReq.get()*1000000/(totalSetTime.get()));
 
 		System.out.println("GetReq = " + getReq);
 		System.out.println("TotalTimeGet = " + totalGetTime);
 		System.out.println("LastProcTime = " + lastGetTime);
-		System.out.println("AverageProcRate = " + getReq.get()/(totalGetTime.get()));
+		System.out.println("AverageProcRate = " + getReq.get()*1000000/(totalGetTime.get()));
 
 		System.out.println("RemvReq = " + removeReq);
 		System.out.println("TotalTimeRemove = " + totalRemoveTime);
 		System.out.println("LastProcTime = " + lastRemoveTime);
-		System.out.println("AverageTimeProcRate = " + removeReq.get()/(totalRemoveTime.get()));
+		System.out.println("AverageTimeProcRate = " + removeReq.get()*1000000/(totalRemoveTime.get()));
 	    }
 	}
 	
