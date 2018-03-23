@@ -72,7 +72,6 @@ public final class SqlConnection {
                     date +"\');";
 	    
             stmt.executeUpdate(sqlQuery);
-	    System.out.println("added" + saveItem.id);
         }
         catch(SQLException e) {
             //e.printStackTrace();
@@ -97,11 +96,12 @@ public final class SqlConnection {
 			rs.getDate(BDAY).getMonth(),
 			rs.getDate(BDAY).getYear()), 
 		rs.getString(ID));
-
+	    
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
 	//System.out.println(returnValue.toString());
+	Cache.getInstance().syncCache(key, returnValue, 2);
 	return returnValue;
         
     }
@@ -113,7 +113,7 @@ public final class SqlConnection {
 	    String date = Integer.toString(updateItemDay.date);
 	    String month = Integer.toString(updateItemDay.month);
 	    String year = Integer.toString(updateItemDay.year);
-	    String updateSQL = "UPDATE \'javabase\' "
+	    String updateSQL = "UPDATE userProfile "
 		    + "SET id = \'" + updateItem.id 
 		    + "\', name = \'" + updateItem.userName
 		    + "\', email = \'" + updateItem.email
@@ -121,7 +121,7 @@ public final class SqlConnection {
 		    + "\', birthDay =\'" + year + "-" + month + "-" + date + "\';";
 		    
 	    stmt.executeUpdate(updateSQL);
-	    HashTable.getInstance().syncCache(year, updateItem, 1);
+	    Cache.getInstance().syncCache(year, updateItem, 1);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;
@@ -132,10 +132,10 @@ public final class SqlConnection {
     public boolean removeFromDB(String key){
 	try (Connection connection = this.getConnection();
 		Statement stmt = connection.createStatement()){
-	    String deleteSQL = "DELETE FROM \'javabase\' "
+	    String deleteSQL = "DELETE FROM userProfile "
 		    + "WHERE id = \'" + key + "\';";
 	    stmt.executeUpdate(deleteSQL);
-	    HashTable.getInstance().syncCache(key, null, 0);
+	    Cache.getInstance().syncCache(key, null, 0);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    return false;
