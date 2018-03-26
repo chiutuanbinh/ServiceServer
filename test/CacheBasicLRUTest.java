@@ -19,13 +19,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import serviceprofileserver.Day;
-import serviceprofileserver.CacheType1;
-import serviceprofileserver.NoSQLConnection;
-import serviceprofileserver.ProfileInfo;
-import serviceprofileserver.ProfileServiceHandlerWithTimeMeasurer;
-import serviceprofileserver.ServerSetting;
-import serviceprofileserver.SqlConnection;
+import com.vng.zing.zalotraing.server.Day;
+import com.vng.zing.zalotraing.server.cache.Cache;
+import com.vng.zing.zalotraing.server.database.NoSQLConnection;
+import com.vng.zing.zalotraing.server.ProfileInfo;
+import com.vng.zing.zalotraing.server.handler.ProfileServiceHandlerWithTimeMeasurer;
+import com.vng.zing.zalotraing.server.ServerSetting;
+import com.vng.zing.zalotraing.server.database.SqlConnection;
 
 /**
  *
@@ -37,7 +37,7 @@ public class CacheBasicLRUTest {
     ProfileInfo data1 = new ProfileInfo("John Rambo", "Bo@gmail", "19961234", new Day(6, 9, 1969), "9999998");
     ProfileInfo data2 = new ProfileInfo("David Beckham", "Beck@gmail", "19006767", new Day(6, 9, 1968), "9999997");
     ProfileInfo data3 = new ProfileInfo("Nguyen Van A", "A@gmail", "18006083", new Day(6, 9, 1968), "9999996");
-    CacheType1 cache = CacheType1.getInstance();
+    Cache cache = Cache.getInstance();
     ProfileServiceHandlerWithTimeMeasurer PSH = new ProfileServiceHandlerWithTimeMeasurer();
     
     public CacheBasicLRUTest() {
@@ -75,7 +75,7 @@ public class CacheBasicLRUTest {
     @Test
     public void addDataShouldNotBringUpExceptions(){
 	SqlConnection sqlconn = SqlConnection.getInstance();
-	CacheType1 cache = CacheType1.getInstance();
+	Cache cache = Cache.getInstance();
 	File fl = new File("output.txt");
 	try {
 	    FileReader fr = new FileReader(fl);

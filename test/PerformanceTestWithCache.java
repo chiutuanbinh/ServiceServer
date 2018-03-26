@@ -20,12 +20,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import serviceprofileserver.CacheType1;
-import serviceprofileserver.Day;
-import serviceprofileserver.NoSQLConnection;
-import serviceprofileserver.ProfileInfo;
-import serviceprofileserver.ProfileServiceHandlerWithTimeMeasurer;
-import serviceprofileserver.SqlConnection;
+import com.vng.zing.zalotraing.server.cache.Cache;
+import com.vng.zing.zalotraing.server.Day;
+import com.vng.zing.zalotraing.server.database.NoSQLConnection;
+import com.vng.zing.zalotraing.server.ProfileInfo;
+import com.vng.zing.zalotraing.server.handler.ProfileServiceHandlerWithTimeMeasurer;
+import com.vng.zing.zalotraing.server.database.SqlConnection;
 
 /**
  *
@@ -53,7 +53,7 @@ public class PerformanceTestWithCache {
 	}
     }
     ProfileServiceHandlerWithTimeMeasurer processor = new ProfileServiceHandlerWithTimeMeasurer();
-    CacheType1 cache = CacheType1.getInstance();
+    Cache cache = Cache.getInstance();
     NoSQLConnection dbConn = NoSQLConnection.getInstance();
     public PerformanceTestWithCache() {
     }

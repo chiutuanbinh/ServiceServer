@@ -55,7 +55,7 @@ public class ShowAllDB {
 	String[] rec = null;
 	long count = 0;
 	while((rec = cs.get_str(true)) != null){
-	    System.out.println(rec[0]);
+	    //System.out.println(rec[0]);
 	    count++;
 	}
 	System.out.print("#####" + count);
