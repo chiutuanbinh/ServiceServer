@@ -65,7 +65,7 @@ public final class NoSQLConnection {
 		conn = createConnection();
 	    //System.out.println("get a connection W");
 	    if (conn.set(saveItem.id, Util.ProfileInfoToString(saveItem))){
-//		System.out.println("Trying to return the connection W");
+		System.out.println(saveItem.id + " added");
 		boolean added = dbPool.offer(conn);
 		if (!added){
 		    conn.close();
@@ -158,6 +158,7 @@ public final class NoSQLConnection {
 	    }
 	
 	    if (conn.remove(key)){
+		System.out.println(key + " removed");
 		ProfileInfo dummyItem = new ProfileInfo();
 		Cache.getInstance().syncCache(key,dummyItem, 0);
 		result = true;
