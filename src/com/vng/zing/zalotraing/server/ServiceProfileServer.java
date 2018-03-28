@@ -8,6 +8,7 @@ package com.vng.zing.zalotraing.server;
 import com.vng.zing.zalotraing.server.handler.ProfileServiceHandlerWithTimeMeasurer;
 import com.vng.zing.zalotraing.server.database.SqlConnection;
 import com.vng.zing.zalotraing.server.database.NoSQLConnection;
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,17 +93,26 @@ public class ServiceProfileServer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-	
-	//start DB Connections
-	SqlConnection.getInstance();
-	NoSQLConnection.getInstance();
-	Measurer pMeasurer = new Measurer();
-	pMeasurer.start();
+	try {
+	    // TODO code application logic here
+	    System.setProperty("java.library.path", "/usr/local/lib");
+	    //set sys_paths to null
+	    final Field sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
+	    sysPathsField.setAccessible(true);
+	    sysPathsField.set(null, null);
+	    
+	    //start DB Connections
+	    SqlConnection.getInstance();
+	    NoSQLConnection.getInstance();
+	    Measurer pMeasurer = new Measurer();
+	    pMeasurer.start();
 //        StartSimpleServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
 //	StartNonBlockingServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
-	StartThreadedSelectorServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
+	    StartThreadedSelectorServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
 //	StartThreadPoolServer(new ProfileService.Processor<>(new ProfileServiceHandlerWithTimeMeasurer()));
+	} catch (Exception e){
+	    e.printStackTrace();
+	}
     }
 
     public static class Measurer extends Thread{

@@ -95,7 +95,7 @@ public final class Cache implements CacheIface{
 	    this.infoTable.remove(key);
 	    
 	    
-	    this.cacheSize -= 1;
+	    this.cacheSize --;
 	    result = true;
 	}
 	return result;
@@ -119,29 +119,6 @@ public final class Cache implements CacheIface{
 		    this.cacheSize--;
 		}
 		break;
-		
-	    case 1:
-		//in case some client fetch the old data to cache before it could be 
-		//updated in the DB
-		//refetch it
-		//if the cache doesn't have the data, fetch it
-		if (this.infoTable.containsKey(key)){
-		    Node<ProfileInfo> oldNode = this.infoTable.get(key);
-		    this.LRUQueue.setElement(oldNode,item);
-		}
-		else{
-		    if (this.cacheSize == MAX_CACHE_SIZE){
-			String rmNodeKey = this.LRUQueue.removeLast().id;
-			this.infoTable.remove(rmNodeKey);
-		    }
-		    else{
-			this.cacheSize ++;
-		    }
-		    this.LRUQueue.addFirst(item);
-		    this.infoTable.put(key, this.LRUQueue.getFirstNode());
-		}
-		break;
-		
 	    case 2:
 		/*If the data is fetch from the database since client cant get it
 		from cache
@@ -152,10 +129,9 @@ public final class Cache implements CacheIface{
 		    if (this.cacheSize == MAX_CACHE_SIZE){
 			String rmNodeKey = this.LRUQueue.removeLast().id;
 			this.infoTable.remove(rmNodeKey);
+			this.cacheSize -- ;
 		    }
-		    else{
-			this.cacheSize ++;
-		    }
+		    this.cacheSize ++;
 		    this.LRUQueue.addFirst(item);
 		    this.infoTable.put(key, this.LRUQueue.getFirstNode());
 		}

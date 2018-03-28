@@ -17,6 +17,5 @@ struct ProfileInfo{
 service ProfileService{
   bool setProfile(1:ProfileInfo profile),
   ProfileInfo getProfile(1:string id),
-  bool updateProfile(1:ProfileInfo profile),
   bool removeProfile(1:string id)
 }

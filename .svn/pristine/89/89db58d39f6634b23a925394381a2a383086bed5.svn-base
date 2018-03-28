@@ -1,0 +1,9 @@
+﻿#default setting
+#Mon Mar 19 11:47:40 ICT 2018
+Username=java
+ConnectionPoolSize=15
+Password=123456
+LRULimit=5000
+DB_Type=NoSQL
+DriverClassName=com.mysql.jdbc.Driver
+Url=jdbc\:mysql\://localhost\:3306/javabase?autoReconnect\=true&useSSL\=false

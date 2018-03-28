@@ -28,10 +28,11 @@ public class ProfileServiceHandlerWithTimeMeasurer implements ProfileService.Ifa
     public boolean setProfile(ProfileInfo profile) throws TException{
 	long start = System.nanoTime();
 	Cache.getInstance().setVal(profile.id, profile);
-	boolean result = DBConn.setDB(profile);
 	long interval = System.nanoTime()- start;
 	ServiceProfileServer.lastSetTime.set(interval);
 	ServiceProfileServer.totalSetTime.addAndGet(interval);
+	boolean result = DBConn.setDB(profile);
+	
 	ServiceProfileServer.setReq.addAndGet(1);
         return result;
     }
@@ -56,17 +57,17 @@ public class ProfileServiceHandlerWithTimeMeasurer implements ProfileService.Ifa
     
     @Override 
     public boolean removeProfile(String id) throws TException{
+	
 	long start = System.nanoTime();
 	boolean result = Cache.getInstance().removeVal(id);
-	result = DBConn.removeDB(id);
 	long interval = System.nanoTime()- start;
 	ServiceProfileServer.lastRemoveTime.set(interval);
 	ServiceProfileServer.totalRemoveTime.addAndGet(interval);
+	
+	result = DBConn.removeDB(id);
+	
 	ServiceProfileServer.removeReq.addAndGet(1);
 	return result; 
     }
-    @Override
-    public boolean updateProfile(ProfileInfo profile) throws TException{
-	return Cache.getInstance().updateVal(profile);
-    }
+    
 }

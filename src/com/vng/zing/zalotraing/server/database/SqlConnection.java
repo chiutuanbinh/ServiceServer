@@ -110,28 +110,6 @@ public final class SqlConnection {
         
     }
     //update the item in the DB 
-    public boolean updateToDB(ProfileInfo updateItem){
-	try (Connection connection = this.getConnection();
-		Statement stmt = connection.createStatement()){
-	    Day updateItemDay = updateItem.birthday;
-	    String date = Integer.toString(updateItemDay.date);
-	    String month = Integer.toString(updateItemDay.month);
-	    String year = Integer.toString(updateItemDay.year);
-	    String updateSQL = "UPDATE userProfile "
-		    + "SET id = \'" + updateItem.id 
-		    + "\', name = \'" + updateItem.userName
-		    + "\', email = \'" + updateItem.email
-		    + "\', phoneNumber = \'" + updateItem.phoneNumber
-		    + "\', birthDay =\'" + year + "-" + month + "-" + date + "\';";
-		    
-	    stmt.executeUpdate(updateSQL);
-	    Cache.getInstance().syncCache(year, updateItem, 1);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    return false;
-	}
-	return true;
-    }
     //remove the item from the DB
     public boolean removeFromDB(String key){
 	try (Connection connection = this.getConnection();

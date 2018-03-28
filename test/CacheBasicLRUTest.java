@@ -149,13 +149,6 @@ public class CacheBasicLRUTest {
 	assertEquals(true, cache.getHashMap().containsKey("3"));
     }
     
-    @Test
-    public void ValueUpdatedShouldBeOnCache() throws TException{
-	data0.id = "3";
-	PSH.updateProfile(data0);
-	assertEquals(true, cache.getHashMap().containsKey("3"));
-    }
-    
     
 }
 

@@ -47,7 +47,7 @@ public class ShowAllDB {
     public void showDBFile(){
 	DB db = new DB();
 	
-	db.open("userProfile.kch", DB.OREADER);
+	db.open("userProfile.kch", DB.OWRITER);
 	
 	Cursor cs = new Cursor(db);
 	
@@ -60,6 +60,7 @@ public class ShowAllDB {
 	}
 	System.out.print("#####" + count);
 	cs.disable();
+//	db.clear();
 	db.close();
     }
 }

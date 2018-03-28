@@ -72,14 +72,6 @@ public class DBHelper implements DBHelperIface{
 		    sqlConnection.saveToDB(data);
 		}
 		break;
-	    case 1: // update operation
-		if (DBSetting.equals("NoSQL")){
-		    noSQLConnection.updateToDB(data);
-		}
-		else if (DBSetting.equals("MySQL")){
-		    sqlConnection.updateToDB(data);
-		}
-		break;
 	    case 2: // remove operation
 		if (DBSetting.equals("NoSQL")){
 		    noSQLConnection.removeFromDB(dataKey);

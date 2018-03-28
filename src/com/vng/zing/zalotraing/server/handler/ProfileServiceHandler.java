@@ -43,8 +43,4 @@ public class ProfileServiceHandler implements ProfileService.Iface{
 
 	return result; 
     }
-    @Override
-    public boolean updateProfile(ProfileInfo profile) throws TException{
-	return Cache.getInstance().updateVal(profile);
-    }
 }
